@@ -260,6 +260,33 @@ const htmlTemplate = `<!DOCTYPE html>
       border: 1px solid #2d3748;
     }
 
+    .blog-list .tag { cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+    .blog-list .tag:hover { background: #2d3748; border-color: #7dd3fc; }
+    .blog-list .tag.tag-active { background: #7dd3fc; color: #0f1117; border-color: #7dd3fc; }
+
+    .tag-filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+      min-height: 1.5rem;
+    }
+
+    .tag-filter-label { font-size: 0.8rem; color: #475569; }
+
+    .tag-clear {
+      font-size: 0.75rem;
+      color: #475569;
+      background: none;
+      border: 1px solid #2d3748;
+      border-radius: 999px;
+      padding: 0.1em 0.6em;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .tag-clear:hover { color: #e2e8f0; border-color: #475569; }
+
     /* Projects */
     .projects-header {
       padding: 2.5rem 0 2rem;
@@ -609,9 +636,14 @@ const blogListContent = `<div class="blog-header">
   <p>All posts, sorted by date.</p>
 </div>
 {{if .Posts}}
-<ul class="blog-list">
+<div class="tag-filter-bar" id="tag-filter-bar" style="display:none">
+  <span class="tag-filter-label">Filtering by:</span>
+  <span class="tag tag-active" id="active-tag-label"></span>
+  <button class="tag-clear" id="tag-clear">clear</button>
+</div>
+<ul class="blog-list" id="blog-list">
   {{range .Posts}}
-  <li>
+  <li data-tags="{{range $i, $t := .Tags}}{{if $i}},{{end}}{{$t}}{{end}}">
     <a href="/blog/{{.Slug}}">
       <span class="blog-post-title">{{.Title}}</span>
       <span class="blog-post-date">{{if .Date}}{{.Date}}{{else}}&mdash;{{end}}</span>
@@ -623,6 +655,48 @@ const blogListContent = `<div class="blog-header">
   </li>
   {{end}}
 </ul>
+<script>
+(function () {
+  var active = null;
+  var bar = document.getElementById('tag-filter-bar');
+  var label = document.getElementById('active-tag-label');
+  var clear = document.getElementById('tag-clear');
+  var items = document.querySelectorAll('#blog-list li');
+
+  function filter(tag) {
+    active = tag;
+    label.textContent = tag;
+    bar.style.display = 'flex';
+    items.forEach(function (li) {
+      var tags = (li.dataset.tags || '').split(',');
+      li.style.display = tags.indexOf(tag) !== -1 ? '' : 'none';
+    });
+    document.querySelectorAll('#blog-list .tag').forEach(function (t) {
+      t.classList.toggle('tag-active', t.textContent.trim() === tag);
+    });
+  }
+
+  function reset() {
+    active = null;
+    bar.style.display = 'none';
+    items.forEach(function (li) { li.style.display = ''; });
+    document.querySelectorAll('#blog-list .tag').forEach(function (t) {
+      t.classList.remove('tag-active');
+    });
+  }
+
+  document.querySelectorAll('#blog-list .tag').forEach(function (t) {
+    t.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      var tag = this.textContent.trim();
+      tag === active ? reset() : filter(tag);
+    });
+  });
+
+  clear.addEventListener('click', reset);
+})();
+</script>
 {{else}}
   <p style="color:#475569">No posts yet.</p>
 {{end}}`
