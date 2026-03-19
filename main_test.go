@@ -107,7 +107,7 @@ func TestConvertFile(t *testing.T) {
 		t.Error("output HTML is empty")
 	}
 
-	checks := []string{"<h1>", "Hello", "<strong>", "bold"}
+	checks := []string{"<!DOCTYPE html>", "JulioTds", "Home", "About", "Projects", "Blog", "Contact", "<h1>", "Hello", "<strong>", "bold"}
 	for _, s := range checks {
 		if !contains(html, s) {
 			t.Errorf("output HTML missing %q\ngot: %s", s, html)
