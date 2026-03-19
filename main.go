@@ -124,6 +124,25 @@ const htmlTemplate = `<!DOCTYPE html>
       border-top: 1px solid #2d3748;
       margin: 2rem 0;
     }
+
+    footer {
+      background: #161b27;
+      border-top: 1px solid #2d3748;
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.85rem;
+      color: #475569;
+      margin-top: 4rem;
+    }
+
+    footer a {
+      color: #64748b;
+    }
+
+    footer a:hover {
+      color: #a78bfa;
+      text-decoration: none;
+    }
   </style>
 </head>
 <body>
@@ -140,6 +159,9 @@ const htmlTemplate = `<!DOCTYPE html>
   <main>
     {{.Content}}
   </main>
+  <footer>
+    &copy; 2026 <a href="/">JulioTds</a>. All rights reserved.
+  </footer>
 </body>
 </html>`
 
