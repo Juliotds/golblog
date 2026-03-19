@@ -661,6 +661,65 @@ func TestGenerateProjectsPage_NoProjects(t *testing.T) {
 	}
 }
 
+func TestCopyImages(t *testing.T) {
+	src := t.TempDir()
+	dst := t.TempDir()
+
+	files := map[string][]byte{
+		"post/photo.jpg":   []byte("jpg-data"),
+		"post/diagram.png": []byte("png-data"),
+		"post/notes.md":    []byte("# ignored"),
+		"post/data.json":   []byte("{}"),
+		"banner.webp":      []byte("webp-data"),
+	}
+	for rel, data := range files {
+		path := filepath.Join(src, rel)
+		if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(path, data, 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	copied, err := copyImages(src, dst)
+	if err != nil {
+		t.Fatalf("copyImages failed: %v", err)
+	}
+
+	if len(copied) != 3 {
+		t.Errorf("expected 3 images copied, got %d: %v", len(copied), copied)
+	}
+
+	for _, img := range []string{"post/photo.jpg", "post/diagram.png", "banner.webp"} {
+		out := filepath.Join(dst, img)
+		if _, err := os.Stat(out); err != nil {
+			t.Errorf("expected %s to exist: %v", out, err)
+		}
+	}
+
+	// Non-image files must not be copied
+	for _, nonImg := range []string{"post/notes.md", "post/data.json"} {
+		out := filepath.Join(dst, nonImg)
+		if _, err := os.Stat(out); err == nil {
+			t.Errorf("expected %s to NOT be copied", out)
+		}
+	}
+}
+
+func TestCopyImages_EmptyDir(t *testing.T) {
+	src := t.TempDir()
+	dst := t.TempDir()
+
+	copied, err := copyImages(src, dst)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(copied) != 0 {
+		t.Errorf("expected no copies, got %v", copied)
+	}
+}
+
 func TestGenerateRSSFeed(t *testing.T) {
 	dir := t.TempDir()
 	dst := filepath.Join(dir, "rss.xml")

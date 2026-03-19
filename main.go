@@ -933,6 +933,14 @@ func run() error {
 	}
 	fmt.Printf("rss  -> out/rss.xml\n")
 
+	copied, err := copyImages(blogDir, outBlogDir)
+	if err != nil {
+		return fmt.Errorf("copying images: %w", err)
+	}
+	for _, dst := range copied {
+		fmt.Printf("img  -> %s\n", dst)
+	}
+
 	return nil
 }
 
@@ -1121,6 +1129,38 @@ func generateRSSFeed(dst string, posts []Post) error {
 	}
 
 	return os.WriteFile(dst, append([]byte(xml.Header), data...), 0644)
+}
+
+var imageExts = map[string]bool{
+	".png": true, ".jpg": true, ".jpeg": true,
+	".gif": true, ".webp": true, ".svg": true, ".avif": true,
+}
+
+func copyImages(srcRoot, dstRoot string) ([]string, error) {
+	var copied []string
+	err := filepath.WalkDir(srcRoot, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() || !imageExts[strings.ToLower(filepath.Ext(path))] {
+			return nil
+		}
+		rel, _ := filepath.Rel(srcRoot, path)
+		dst := filepath.Join(dstRoot, rel)
+		if err := os.MkdirAll(filepath.Dir(dst), 0755); err != nil {
+			return err
+		}
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		if err := os.WriteFile(dst, data, 0644); err != nil {
+			return err
+		}
+		copied = append(copied, dst)
+		return nil
+	})
+	return copied, err
 }
 
 func collectMarkdownFiles(root string) ([]string, error) {
