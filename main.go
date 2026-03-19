@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"encoding/xml"
 	"fmt"
 	"html/template"
 	"os"
@@ -18,6 +19,7 @@ const htmlTemplate = `<!DOCTYPE html>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>JulioTds</title>
+  <link rel="alternate" type="application/rss+xml" title="JulioTds RSS Feed" href="/rss.xml">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -199,6 +201,29 @@ const htmlTemplate = `<!DOCTYPE html>
       font-family: "JetBrains Mono", monospace;
     }
 
+    /* RSS button */
+    .rss-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      color: #f97316;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      padding: 0.35rem 0.75rem;
+      border: 1px solid #431407;
+      border-radius: 6px;
+      transition: background 0.15s, border-color 0.15s;
+      margin-left: 0.75rem;
+    }
+
+    .rss-btn:hover {
+      background: #431407;
+      text-decoration: none;
+    }
+
+    .rss-btn svg { flex-shrink: 0; }
+
     /* Comments */
     .comments {
       margin-top: 4rem;
@@ -329,6 +354,13 @@ const htmlTemplate = `<!DOCTYPE html>
       <a href="/blog">Blog</a>
       <a href="/contact">Contact</a>
     </nav>
+    <a class="rss-btn" href="/rss.xml">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+        <circle cx="6.18" cy="17.82" r="2.18"/>
+        <path d="M4 4.44v2.83c7.03 0 12.73 5.7 12.73 12.73h2.83c0-8.59-6.97-15.56-15.56-15.56zm0 5.66v2.83c3.9 0 7.07 3.17 7.07 7.07h2.83c0-5.47-4.43-9.9-9.9-9.9z"/>
+      </svg>
+      RSS
+    </a>
   </header>
   <main>
     {{.Content}}
@@ -396,10 +428,32 @@ var pageTmpl = template.Must(template.New("page").Parse(htmlTemplate))
 var homeTmpl = template.Must(template.New("home").Parse(homeContent))
 
 const (
-	blogDir     = "blog"
-	outDir      = "out"
+	blogDir      = "blog"
+	outDir       = "out"
 	commentsFile = "blog/comments.json"
+	baseURL      = "https://juliotds.com"
 )
+
+type rssItem struct {
+	XMLName xml.Name `xml:"item"`
+	Title   string   `xml:"title"`
+	Link    string   `xml:"link"`
+	GUID    string   `xml:"guid"`
+}
+
+type rssChannel struct {
+	XMLName     xml.Name  `xml:"channel"`
+	Title       string    `xml:"title"`
+	Link        string    `xml:"link"`
+	Description string    `xml:"description"`
+	Items       []rssItem
+}
+
+type rssFeed struct {
+	XMLName xml.Name   `xml:"rss"`
+	Version string     `xml:"version,attr"`
+	Channel rssChannel
+}
 
 type Comment struct {
 	Author string `json:"author"`
@@ -453,6 +507,12 @@ func run() error {
 	}
 	fmt.Printf("home -> %s\n", dst)
 
+	rssDst := filepath.Join(outDir, "rss.xml")
+	if err := generateRSSFeed(rssDst, posts); err != nil {
+		return fmt.Errorf("generating RSS feed: %w", err)
+	}
+	fmt.Printf("rss  -> %s\n", rssDst)
+
 	return nil
 }
 
@@ -498,6 +558,37 @@ func generateHomePage(dst string, posts []Post) error {
 	defer f.Close()
 
 	return pageTmpl.Execute(f, PageData{Content: template.HTML(body.String())})
+}
+
+func generateRSSFeed(dst string, posts []Post) error {
+	feed := rssFeed{
+		Version: "2.0",
+		Channel: rssChannel{
+			Title:       "JulioTds",
+			Link:        baseURL,
+			Description: "Developer. Builder. Writing about code, tools, and ideas.",
+		},
+	}
+
+	for _, p := range posts {
+		link := baseURL + "/blog/" + p.Slug
+		feed.Channel.Items = append(feed.Channel.Items, rssItem{
+			Title: p.Title,
+			Link:  link,
+			GUID:  link,
+		})
+	}
+
+	data, err := xml.MarshalIndent(feed, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	if err := os.MkdirAll(filepath.Dir(dst), 0755); err != nil {
+		return err
+	}
+
+	return os.WriteFile(dst, append([]byte(xml.Header), data...), 0644)
 }
 
 func collectMarkdownFiles(root string) ([]string, error) {

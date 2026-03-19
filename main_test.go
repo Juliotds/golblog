@@ -217,6 +217,59 @@ func TestConvertFile_NoComments(t *testing.T) {
 	}
 }
 
+func TestGenerateRSSFeed(t *testing.T) {
+	dir := t.TempDir()
+	dst := filepath.Join(dir, "rss.xml")
+
+	posts := []Post{
+		{Title: "Hello World", Slug: "hello-world"},
+		{Title: "Go Tips", Slug: "go-tips"},
+	}
+
+	if err := generateRSSFeed(dst, posts); err != nil {
+		t.Fatalf("generateRSSFeed failed: %v", err)
+	}
+
+	content, err := os.ReadFile(dst)
+	if err != nil {
+		t.Fatalf("rss.xml not created: %v", err)
+	}
+
+	xml := string(content)
+	checks := []string{
+		`<?xml version="1.0"`,
+		`version="2.0"`,
+		"JulioTds",
+		"Hello World",
+		"/blog/hello-world",
+		"Go Tips",
+		"/blog/go-tips",
+	}
+	for _, s := range checks {
+		if !contains(xml, s) {
+			t.Errorf("rss.xml missing %q", s)
+		}
+	}
+}
+
+func TestGenerateRSSFeed_NoPosts(t *testing.T) {
+	dir := t.TempDir()
+	dst := filepath.Join(dir, "rss.xml")
+
+	if err := generateRSSFeed(dst, nil); err != nil {
+		t.Fatalf("generateRSSFeed failed: %v", err)
+	}
+
+	content, err := os.ReadFile(dst)
+	if err != nil {
+		t.Fatalf("rss.xml not created: %v", err)
+	}
+
+	if !contains(string(content), "JulioTds") {
+		t.Error("rss.xml missing channel title")
+	}
+}
+
 func TestConvertFile_MissingSource(t *testing.T) {
 	dir := t.TempDir()
 	err := convertFile("/nonexistent/post.md", filepath.Join(dir, "out.html"), "slug", nil)
