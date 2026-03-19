@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"os"
@@ -135,9 +136,7 @@ const htmlTemplate = `<!DOCTYPE html>
       margin-top: 4rem;
     }
 
-    footer a {
-      color: #64748b;
-    }
+    footer a { color: #64748b; }
 
     footer a:hover {
       color: #a78bfa;
@@ -179,9 +178,7 @@ const htmlTemplate = `<!DOCTYPE html>
       margin: 0;
     }
 
-    .post-list li {
-      border-bottom: 1px solid #1e2535;
-    }
+    .post-list li { border-bottom: 1px solid #1e2535; }
 
     .post-list a {
       display: flex;
@@ -194,7 +191,6 @@ const htmlTemplate = `<!DOCTYPE html>
     }
 
     .post-list a:hover { color: #a78bfa; }
-
     .post-list .post-title { font-size: 1rem; }
 
     .post-list .post-slug {
@@ -202,6 +198,125 @@ const htmlTemplate = `<!DOCTYPE html>
       color: #475569;
       font-family: "JetBrains Mono", monospace;
     }
+
+    /* Comments */
+    .comments {
+      margin-top: 4rem;
+      border-top: 1px solid #2d3748;
+      padding-top: 2rem;
+    }
+
+    .comments-heading {
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #475569;
+      margin: 0 0 1.5rem;
+    }
+
+    .comment {
+      background: #161b27;
+      border: 1px solid #2d3748;
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .comment-meta {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .comment-author {
+      font-weight: 600;
+      color: #a78bfa;
+      font-size: 0.9rem;
+    }
+
+    .comment-date {
+      color: #475569;
+      font-size: 0.85rem;
+    }
+
+    .comment-body {
+      color: #cbd5e1;
+      font-size: 0.95rem;
+      margin: 0;
+    }
+
+    .no-comments {
+      color: #475569;
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Comment form */
+    .comment-form {
+      margin-top: 2rem;
+      background: #161b27;
+      border: 1px solid #2d3748;
+      border-radius: 8px;
+      padding: 1.5rem;
+    }
+
+    .comment-form h3 {
+      font-size: 1rem;
+      color: #94a3b8;
+      margin: 0 0 1.25rem;
+      font-weight: 500;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.8rem;
+      color: #64748b;
+      margin-bottom: 0.35rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      background: #0f1117;
+      border: 1px solid #2d3748;
+      border-radius: 6px;
+      padding: 0.6rem 0.85rem;
+      color: #e2e8f0;
+      font-size: 0.95rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      border-color: #a78bfa;
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .form-submit {
+      background: #a78bfa;
+      color: #0f1117;
+      border: none;
+      border-radius: 6px;
+      padding: 0.6rem 1.5rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .form-submit:hover { background: #c4b5fd; }
   </style>
 </head>
 <body>
@@ -217,6 +332,39 @@ const htmlTemplate = `<!DOCTYPE html>
   </header>
   <main>
     {{.Content}}
+    {{if .Slug}}
+    <section class="comments">
+      <h2 class="comments-heading">Comments</h2>
+      {{if .Comments}}
+        {{range .Comments}}
+        <div class="comment">
+          <div class="comment-meta">
+            <span class="comment-author">{{.Author}}</span>
+            <span class="comment-date">{{.Date}}</span>
+          </div>
+          <p class="comment-body">{{.Body}}</p>
+        </div>
+        {{end}}
+      {{else}}
+        <p class="no-comments">No comments yet. Be the first!</p>
+      {{end}}
+      <div class="comment-form">
+        <h3>Leave a comment</h3>
+        <form method="POST" action="/comment">
+          <input type="hidden" name="slug" value="{{.Slug}}">
+          <div class="form-group">
+            <label for="author">Name</label>
+            <input type="text" id="author" name="author" placeholder="Your name" required>
+          </div>
+          <div class="form-group">
+            <label for="body">Comment</label>
+            <textarea id="body" name="body" placeholder="Write your comment..." required></textarea>
+          </div>
+          <button type="submit" class="form-submit">Post comment</button>
+        </form>
+      </div>
+    </section>
+    {{end}}
   </main>
   <footer>
     &copy; 2026 <a href="/">JulioTds</a>. All rights reserved.
@@ -248,9 +396,27 @@ var pageTmpl = template.Must(template.New("page").Parse(htmlTemplate))
 var homeTmpl = template.Must(template.New("home").Parse(homeContent))
 
 const (
-	blogDir = "blog"
-	outDir  = "out"
+	blogDir     = "blog"
+	outDir      = "out"
+	commentsFile = "blog/comments.json"
 )
+
+type Comment struct {
+	Author string `json:"author"`
+	Body   string `json:"body"`
+	Date   string `json:"date"`
+}
+
+type PageData struct {
+	Content  template.HTML
+	Comments []Comment
+	Slug     string
+}
+
+type Post struct {
+	Title string
+	Slug  string
+}
 
 func main() {
 	if err := run(); err != nil {
@@ -259,12 +425,12 @@ func main() {
 	}
 }
 
-type Post struct {
-	Title string
-	Slug  string
-}
-
 func run() error {
+	allComments, err := loadComments(commentsFile)
+	if err != nil {
+		return fmt.Errorf("loading comments: %w", err)
+	}
+
 	entries, err := collectMarkdownFiles(blogDir)
 	if err != nil {
 		return fmt.Errorf("collecting markdown files: %w", err)
@@ -272,12 +438,13 @@ func run() error {
 
 	var posts []Post
 	for _, src := range entries {
+		post := postFromPath(src)
 		dst := markdownToOutputPath(src, blogDir, outDir)
-		if err := convertFile(src, dst); err != nil {
+		if err := convertFile(src, dst, post.Slug, allComments[post.Slug]); err != nil {
 			return fmt.Errorf("converting %s: %w", src, err)
 		}
 		fmt.Printf("%s -> %s\n", src, dst)
-		posts = append(posts, postFromPath(src))
+		posts = append(posts, post)
 	}
 
 	dst := filepath.Join(outDir, "index.html")
@@ -287,6 +454,22 @@ func run() error {
 	fmt.Printf("home -> %s\n", dst)
 
 	return nil
+}
+
+func loadComments(path string) (map[string][]Comment, error) {
+	data, err := os.ReadFile(path)
+	if os.IsNotExist(err) {
+		return map[string][]Comment{}, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	var comments map[string][]Comment
+	if err := json.Unmarshal(data, &comments); err != nil {
+		return nil, err
+	}
+	return comments, nil
 }
 
 func postFromPath(src string) Post {
@@ -314,9 +497,7 @@ func generateHomePage(dst string, posts []Post) error {
 	}
 	defer f.Close()
 
-	return pageTmpl.Execute(f, struct{ Content template.HTML }{
-		Content: template.HTML(body.String()),
-	})
+	return pageTmpl.Execute(f, PageData{Content: template.HTML(body.String())})
 }
 
 func collectMarkdownFiles(root string) ([]string, error) {
@@ -339,7 +520,7 @@ func markdownToOutputPath(src, srcRoot, dstRoot string) string {
 	return filepath.Join(dstRoot, noExt+".html")
 }
 
-func convertFile(src, dst string) error {
+func convertFile(src, dst, slug string, comments []Comment) error {
 	input, err := os.ReadFile(src)
 	if err != nil {
 		return err
@@ -360,7 +541,9 @@ func convertFile(src, dst string) error {
 	}
 	defer f.Close()
 
-	return pageTmpl.Execute(f, struct{ Content template.HTML }{
-		Content: template.HTML(body.String()),
+	return pageTmpl.Execute(f, PageData{
+		Content:  template.HTML(body.String()),
+		Comments: comments,
+		Slug:     slug,
 	})
 }
