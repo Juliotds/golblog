@@ -68,18 +68,18 @@ const htmlTemplate = `<!DOCTYPE html>
       display: flex;
       align-items: center;
       gap: 0.35rem;
-      color: #f97316;
+      color: #fff;
+      background: #ea580c;
       text-decoration: none;
       font-size: 0.85rem;
-      font-weight: 500;
+      font-weight: 600;
       padding: 0.35rem 0.75rem;
-      border: 1px solid #431407;
       border-radius: 6px;
-      transition: background 0.15s, border-color 0.15s;
+      transition: background 0.15s;
       margin-left: 0.75rem;
     }
 
-    .rss-btn:hover { background: #431407; text-decoration: none; }
+    .rss-btn:hover { background: #c2410c; text-decoration: none; }
     .rss-btn svg { flex-shrink: 0; }
 
     main {
