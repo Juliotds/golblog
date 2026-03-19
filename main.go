@@ -584,7 +584,7 @@ const htmlTemplate = `<!DOCTYPE html>
         <p class="no-comments">No comments yet. Be the first!</p>
       {{end}}
       <div class="comment-form">
-        <h3>Leave a comment</h3>
+        <h3>Leave a comment <a href="/info" style="font-size:0.75rem;font-weight:400;color:#475569;margin-left:0.4rem;">How does this work?</a></h3>
         <form method="POST" action="/comment">
           <input type="hidden" name="slug" value="{{.Slug}}">
           <div class="form-group">
