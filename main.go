@@ -696,7 +696,7 @@ const (
 	outDir       = "out"
 	outBlogDir   = "out/blog"
 	commentsFile = "blog/comments.json"
-	projectsFile = "projects.json"
+	projectsFile = "blog/projects.json"
 	aboutFile    = "blog/about.json"
 	contactFile  = "blog/contact.json"
 	baseURL      = "https://juliotds.com"
