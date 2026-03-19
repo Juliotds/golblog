@@ -769,12 +769,39 @@ const contactContent = `{{if .}}
 <p style="color:#475569">Contact page coming soon.</p>
 {{end}}`
 
+const infoContent = `<div class="blog-header">
+  <h1>Site Info</h1>
+  <p>How this blog works under the hood.</p>
+</div>
+<h2>Comment section</h2>
+<p>
+  The comment form at the bottom of each post is intentionally minimal.
+  Submitting a comment sends a <code>POST</code> request to <code>/comment</code>
+  with your name, message, and an optional private contact field.
+</p>
+<p>
+  Comments are <strong>not published automatically</strong>. Each submission goes
+  into a database and sits there until I review it manually. Once approved, I add
+  it to the post&#39;s entry in <code>blog/comments.json</code> and regenerate the
+  site, at which point it appears on the page.
+</p>
+<p>
+  This means there will be a delay between submitting a comment and seeing it live.
+  Spam, abuse, or off-topic submissions are simply discarded.
+</p>
+<h2>Privacy</h2>
+<p>
+  The optional <em>Contact</em> field in the comment form is private — it is never
+  displayed publicly and is only used if I need to follow up with you directly.
+</p>`
+
 var pageTmpl = template.Must(template.New("page").Parse(htmlTemplate))
 var homeTmpl = template.Must(template.New("home").Parse(homeContent))
 var blogListTmpl = template.Must(template.New("blogList").Parse(blogListContent))
 var projectsTmpl = template.Must(template.New("projects").Parse(projectsContent))
 var aboutTmpl = template.Must(template.New("about").Parse(aboutContent))
 var contactTmpl = template.Must(template.New("contact").Parse(contactContent))
+var infoTmpl = template.Must(template.New("info").Parse(infoContent))
 
 const (
 	blogDir      = "blog"
@@ -933,6 +960,11 @@ func run() error {
 	}
 	fmt.Printf("rss  -> out/rss.xml\n")
 
+	if err := generateInfoPage(filepath.Join(outDir, "info", "index.html")); err != nil {
+		return fmt.Errorf("generating info page: %w", err)
+	}
+	fmt.Printf("info -> out/info/index.html\n")
+
 	copied, err := copyImages(blogDir, outBlogDir)
 	if err != nil {
 		return fmt.Errorf("copying images: %w", err)
@@ -1036,6 +1068,10 @@ func loadContact(path string) (*Contact, error) {
 
 func generateContactPage(dst string, contact *Contact) error {
 	return renderPage(dst, contactTmpl, contact)
+}
+
+func generateInfoPage(dst string) error {
+	return renderPage(dst, infoTmpl, nil)
 }
 
 func loadAbout(path string) (*About, error) {

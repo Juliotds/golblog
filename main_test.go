@@ -661,6 +661,28 @@ func TestGenerateProjectsPage_NoProjects(t *testing.T) {
 	}
 }
 
+func TestGenerateInfoPage(t *testing.T) {
+	dir := t.TempDir()
+	dst := filepath.Join(dir, "info", "index.html")
+
+	if err := generateInfoPage(dst); err != nil {
+		t.Fatalf("generateInfoPage failed: %v", err)
+	}
+
+	content, err := os.ReadFile(dst)
+	if err != nil {
+		t.Fatalf("info page not created: %v", err)
+	}
+
+	html := string(content)
+	checks := []string{"Site Info", "comment", "/comment", "manually", "private"}
+	for _, s := range checks {
+		if !contains(html, s) {
+			t.Errorf("info page missing %q", s)
+		}
+	}
+}
+
 func TestCopyImages(t *testing.T) {
 	src := t.TempDir()
 	dst := t.TempDir()
