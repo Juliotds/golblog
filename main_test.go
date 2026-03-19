@@ -386,6 +386,105 @@ func TestGenerateBlogPage_NoPosts(t *testing.T) {
 	}
 }
 
+func TestLoadAbout(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "about.json")
+
+	data := About{
+		Name:     "Julio",
+		Headline: "Developer",
+		Bio:      "I build things.",
+		Location: "Brazil",
+		Skills:   []string{"Go", "JavaScript"},
+		Social:   []SocialLink{{Label: "GitHub", URL: "https://github.com/Juliotds"}},
+	}
+	raw, _ := json.Marshal(data)
+	if err := os.WriteFile(path, raw, 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := loadAbout(path)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if got.Name != "Julio" {
+		t.Errorf("expected name Julio, got %q", got.Name)
+	}
+	if len(got.Skills) != 2 {
+		t.Errorf("expected 2 skills, got %d", len(got.Skills))
+	}
+	if len(got.Social) != 1 || got.Social[0].Label != "GitHub" {
+		t.Errorf("unexpected social links: %v", got.Social)
+	}
+}
+
+func TestLoadAbout_MissingFile(t *testing.T) {
+	got, err := loadAbout("/nonexistent/about.json")
+	if err != nil {
+		t.Fatalf("expected no error for missing file, got %v", err)
+	}
+	if got != nil {
+		t.Errorf("expected nil, got %v", got)
+	}
+}
+
+func TestLoadAbout_InvalidJSON(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "about.json")
+	if err := os.WriteFile(path, []byte("not json"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	_, err := loadAbout(path)
+	if err == nil {
+		t.Error("expected error for invalid JSON, got nil")
+	}
+}
+
+func TestGenerateAboutPage(t *testing.T) {
+	dir := t.TempDir()
+	dst := filepath.Join(dir, "about", "index.html")
+
+	about := &About{
+		Name:     "Julio",
+		Headline: "Developer & Builder",
+		Bio:      "I build things.",
+		Location: "Brazil",
+		Skills:   []string{"Go", "Docker"},
+		Social:   []SocialLink{{Label: "GitHub", URL: "https://github.com/Juliotds"}},
+	}
+
+	if err := generateAboutPage(dst, about); err != nil {
+		t.Fatalf("generateAboutPage failed: %v", err)
+	}
+
+	content, err := os.ReadFile(dst)
+	if err != nil {
+		t.Fatalf("about page not created: %v", err)
+	}
+
+	html := string(content)
+	checks := []string{"Julio", "Developer", "Builder", "I build things.", "Brazil", "Go", "Docker", "GitHub", "https://github.com/Juliotds"}
+	for _, s := range checks {
+		if !contains(html, s) {
+			t.Errorf("about page missing %q", s)
+		}
+	}
+}
+
+func TestGenerateAboutPage_Nil(t *testing.T) {
+	dir := t.TempDir()
+	dst := filepath.Join(dir, "about", "index.html")
+
+	if err := generateAboutPage(dst, nil); err != nil {
+		t.Fatalf("generateAboutPage failed: %v", err)
+	}
+
+	content, _ := os.ReadFile(dst)
+	if !contains(string(content), "coming soon") {
+		t.Error("expected fallback message for nil about")
+	}
+}
+
 func TestLoadProjects(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "projects.json")

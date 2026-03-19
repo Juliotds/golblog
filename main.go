@@ -321,6 +321,86 @@ const htmlTemplate = `<!DOCTYPE html>
 
     .project-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
 
+    /* About */
+    .about-header {
+      padding: 3rem 0 2.5rem;
+      border-bottom: 1px solid #2d3748;
+      margin-bottom: 2.5rem;
+    }
+
+    .about-name {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin: 0 0 0.25rem;
+    }
+
+    .about-headline {
+      font-size: 1.05rem;
+      color: #64748b;
+      margin: 0 0 0.75rem;
+    }
+
+    .about-location {
+      font-size: 0.85rem;
+      color: #475569;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .about-bio {
+      font-size: 1rem;
+      color: #cbd5e1;
+      line-height: 1.8;
+      margin-bottom: 2rem;
+    }
+
+    .about-section-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #475569;
+      margin: 0 0 0.85rem;
+    }
+
+    .about-skills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .skill-tag {
+      font-size: 0.82rem;
+      padding: 0.3em 0.75em;
+      border-radius: 6px;
+      background: #1e2535;
+      color: #e2e8f0;
+      border: 1px solid #2d3748;
+    }
+
+    .about-social { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+    .social-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.88rem;
+      color: #a78bfa;
+      border: 1px solid #2d3748;
+      border-radius: 6px;
+      padding: 0.35rem 0.85rem;
+      text-decoration: none;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .social-link:hover {
+      background: #1e2535;
+      border-color: #a78bfa;
+      text-decoration: none;
+    }
+
     /* Comments */
     .comments {
       margin-top: 4rem;
@@ -537,10 +617,36 @@ const projectsContent = `<div class="projects-header">
   <p style="color:#475569">No projects yet.</p>
 {{end}}`
 
+const aboutContent = `{{if .}}
+<div class="about-header">
+  <h1 class="about-name">{{.Name}}</h1>
+  <p class="about-headline">{{.Headline}}</p>
+  {{if .Location}}<span class="about-location">&#128205; {{.Location}}</span>{{end}}
+</div>
+{{if .Bio}}<p class="about-bio">{{.Bio}}</p>{{end}}
+{{if .Skills}}
+<p class="about-section-label">Skills</p>
+<div class="about-skills">
+  {{range .Skills}}<span class="skill-tag">{{.}}</span>{{end}}
+</div>
+{{end}}
+{{if .Social}}
+<p class="about-section-label">Links</p>
+<div class="about-social">
+  {{range .Social}}
+  <a class="social-link" href="{{.URL}}" target="_blank" rel="noopener">{{.Label}}</a>
+  {{end}}
+</div>
+{{end}}
+{{else}}
+<p style="color:#475569">About page coming soon.</p>
+{{end}}`
+
 var pageTmpl = template.Must(template.New("page").Parse(htmlTemplate))
 var homeTmpl = template.Must(template.New("home").Parse(homeContent))
 var blogListTmpl = template.Must(template.New("blogList").Parse(blogListContent))
 var projectsTmpl = template.Must(template.New("projects").Parse(projectsContent))
+var aboutTmpl = template.Must(template.New("about").Parse(aboutContent))
 
 const (
 	blogDir      = "blog"
@@ -548,6 +654,7 @@ const (
 	outBlogDir   = "out/blog"
 	commentsFile = "blog/comments.json"
 	projectsFile = "projects.json"
+	aboutFile    = "blog/about.json"
 	baseURL      = "https://juliotds.com"
 )
 
@@ -561,6 +668,20 @@ type PageData struct {
 	Content  template.HTML
 	Comments []Comment
 	Slug     string
+}
+
+type SocialLink struct {
+	Label string `json:"label"`
+	URL   string `json:"url"`
+}
+
+type About struct {
+	Name     string       `json:"name"`
+	Headline string       `json:"headline"`
+	Bio      string       `json:"bio"`
+	Location string       `json:"location"`
+	Skills   []string     `json:"skills"`
+	Social   []SocialLink `json:"social"`
 }
 
 type Project struct {
@@ -618,6 +739,11 @@ func run() error {
 		return fmt.Errorf("loading projects: %w", err)
 	}
 
+	about, err := loadAbout(aboutFile)
+	if err != nil {
+		return fmt.Errorf("loading about: %w", err)
+	}
+
 	entries, err := collectMarkdownFiles(blogDir)
 	if err != nil {
 		return fmt.Errorf("collecting markdown files: %w", err)
@@ -646,6 +772,11 @@ func run() error {
 		return fmt.Errorf("generating blog page: %w", err)
 	}
 	fmt.Printf("blog -> out/blog/index.html\n")
+
+	if err := generateAboutPage(filepath.Join(outDir, "about", "index.html"), about); err != nil {
+		return fmt.Errorf("generating about page: %w", err)
+	}
+	fmt.Printf("about-> out/about/index.html\n")
 
 	if err := generateProjectsPage(filepath.Join(outDir, "projects", "index.html"), projects); err != nil {
 		return fmt.Errorf("generating projects page: %w", err)
@@ -733,6 +864,25 @@ func loadComments(path string) (map[string][]Comment, error) {
 		return nil, err
 	}
 	return comments, nil
+}
+
+func loadAbout(path string) (*About, error) {
+	data, err := os.ReadFile(path)
+	if os.IsNotExist(err) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	var about About
+	if err := json.Unmarshal(data, &about); err != nil {
+		return nil, err
+	}
+	return &about, nil
+}
+
+func generateAboutPage(dst string, about *About) error {
+	return renderPage(dst, aboutTmpl, about)
 }
 
 func loadProjects(path string) ([]Project, error) {

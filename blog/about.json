@@ -1,0 +1,10 @@
+{
+  "name": "Julio",
+  "headline": "Developer & Builder",
+  "bio": "I write code, build tools, and occasionally blog about things I find interesting. I enjoy working close to the metal and shipping simple, focused software.",
+  "location": "Brazil",
+  "skills": ["Go", "JavaScript", "TypeScript", "Docker", "Linux"],
+  "social": [
+    { "label": "GitHub", "url": "https://github.com/Juliotds" }
+  ]
+}
