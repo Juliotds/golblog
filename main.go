@@ -402,6 +402,28 @@ const htmlTemplate = `<!DOCTYPE html>
     }
 
     /* Comments */
+    /* Contact */
+    .contact-header {
+      padding: 2.5rem 0 2rem;
+      border-bottom: 1px solid #2d3748;
+      margin-bottom: 2rem;
+    }
+
+    .contact-header h1 { margin: 0 0 0.25rem; font-size: 2rem; }
+    .contact-header p { margin: 0; color: #64748b; }
+
+    .contact-email {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1rem;
+      color: #a78bfa;
+      margin-bottom: 2rem;
+    }
+
+    .contact-email:hover { text-decoration: underline; }
+
+    /* Comments */
     .comments {
       margin-top: 4rem;
       border-top: 1px solid #2d3748;
@@ -642,11 +664,32 @@ const aboutContent = `{{if .}}
 <p style="color:#475569">About page coming soon.</p>
 {{end}}`
 
+const contactContent = `{{if .}}
+<div class="contact-header">
+  <h1>Contact</h1>
+  <p>{{.Message}}</p>
+</div>
+{{if .Email}}
+<a class="contact-email" href="mailto:{{.Email}}">&#9993; {{.Email}}</a>
+{{end}}
+{{if .Social}}
+<p class="about-section-label">Links</p>
+<div class="about-social">
+  {{range .Social}}
+  <a class="social-link" href="{{.URL}}" target="_blank" rel="noopener">{{.Label}}</a>
+  {{end}}
+</div>
+{{end}}
+{{else}}
+<p style="color:#475569">Contact page coming soon.</p>
+{{end}}`
+
 var pageTmpl = template.Must(template.New("page").Parse(htmlTemplate))
 var homeTmpl = template.Must(template.New("home").Parse(homeContent))
 var blogListTmpl = template.Must(template.New("blogList").Parse(blogListContent))
 var projectsTmpl = template.Must(template.New("projects").Parse(projectsContent))
 var aboutTmpl = template.Must(template.New("about").Parse(aboutContent))
+var contactTmpl = template.Must(template.New("contact").Parse(contactContent))
 
 const (
 	blogDir      = "blog"
@@ -655,6 +698,7 @@ const (
 	commentsFile = "blog/comments.json"
 	projectsFile = "projects.json"
 	aboutFile    = "blog/about.json"
+	contactFile  = "blog/contact.json"
 	baseURL      = "https://juliotds.com"
 )
 
@@ -668,6 +712,12 @@ type PageData struct {
 	Content  template.HTML
 	Comments []Comment
 	Slug     string
+}
+
+type Contact struct {
+	Email   string       `json:"email"`
+	Message string       `json:"message"`
+	Social  []SocialLink `json:"social"`
 }
 
 type SocialLink struct {
@@ -744,6 +794,11 @@ func run() error {
 		return fmt.Errorf("loading about: %w", err)
 	}
 
+	contact, err := loadContact(contactFile)
+	if err != nil {
+		return fmt.Errorf("loading contact: %w", err)
+	}
+
 	entries, err := collectMarkdownFiles(blogDir)
 	if err != nil {
 		return fmt.Errorf("collecting markdown files: %w", err)
@@ -772,6 +827,11 @@ func run() error {
 		return fmt.Errorf("generating blog page: %w", err)
 	}
 	fmt.Printf("blog -> out/blog/index.html\n")
+
+	if err := generateContactPage(filepath.Join(outDir, "contact", "index.html"), contact); err != nil {
+		return fmt.Errorf("generating contact page: %w", err)
+	}
+	fmt.Printf("cont -> out/contact/index.html\n")
 
 	if err := generateAboutPage(filepath.Join(outDir, "about", "index.html"), about); err != nil {
 		return fmt.Errorf("generating about page: %w", err)
@@ -864,6 +924,25 @@ func loadComments(path string) (map[string][]Comment, error) {
 		return nil, err
 	}
 	return comments, nil
+}
+
+func loadContact(path string) (*Contact, error) {
+	data, err := os.ReadFile(path)
+	if os.IsNotExist(err) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	var contact Contact
+	if err := json.Unmarshal(data, &contact); err != nil {
+		return nil, err
+	}
+	return &contact, nil
+}
+
+func generateContactPage(dst string, contact *Contact) error {
+	return renderPage(dst, contactTmpl, contact)
 }
 
 func loadAbout(path string) (*About, error) {

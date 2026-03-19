@@ -386,6 +386,96 @@ func TestGenerateBlogPage_NoPosts(t *testing.T) {
 	}
 }
 
+func TestLoadContact(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "contact.json")
+
+	data := Contact{
+		Email:   "julio@example.com",
+		Message: "Reach out anytime.",
+		Social:  []SocialLink{{Label: "GitHub", URL: "https://github.com/Juliotds"}},
+	}
+	raw, _ := json.Marshal(data)
+	if err := os.WriteFile(path, raw, 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := loadContact(path)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if got.Email != "julio@example.com" {
+		t.Errorf("expected email julio@example.com, got %q", got.Email)
+	}
+	if len(got.Social) != 1 || got.Social[0].Label != "GitHub" {
+		t.Errorf("unexpected social links: %v", got.Social)
+	}
+}
+
+func TestLoadContact_MissingFile(t *testing.T) {
+	got, err := loadContact("/nonexistent/contact.json")
+	if err != nil {
+		t.Fatalf("expected no error for missing file, got %v", err)
+	}
+	if got != nil {
+		t.Errorf("expected nil, got %v", got)
+	}
+}
+
+func TestLoadContact_InvalidJSON(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "contact.json")
+	if err := os.WriteFile(path, []byte("not json"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	_, err := loadContact(path)
+	if err == nil {
+		t.Error("expected error for invalid JSON, got nil")
+	}
+}
+
+func TestGenerateContactPage(t *testing.T) {
+	dir := t.TempDir()
+	dst := filepath.Join(dir, "contact", "index.html")
+
+	contact := &Contact{
+		Email:   "julio@example.com",
+		Message: "Reach out anytime.",
+		Social:  []SocialLink{{Label: "GitHub", URL: "https://github.com/Juliotds"}},
+	}
+
+	if err := generateContactPage(dst, contact); err != nil {
+		t.Fatalf("generateContactPage failed: %v", err)
+	}
+
+	content, err := os.ReadFile(dst)
+	if err != nil {
+		t.Fatalf("contact page not created: %v", err)
+	}
+
+	html := string(content)
+	checks := []string{"julio@example.com", "Reach out anytime.", "GitHub", "https://github.com/Juliotds", "mailto:julio@example.com"}
+	for _, s := range checks {
+		if !contains(html, s) {
+			t.Errorf("contact page missing %q", s)
+		}
+	}
+}
+
+func TestGenerateContactPage_Nil(t *testing.T) {
+	dir := t.TempDir()
+	dst := filepath.Join(dir, "contact", "index.html")
+
+	if err := generateContactPage(dst, nil); err != nil {
+		t.Fatalf("generateContactPage failed: %v", err)
+	}
+
+	content, _ := os.ReadFile(dst)
+	if !contains(string(content), "coming soon") {
+		t.Error("expected fallback message for nil contact")
+	}
+}
+
 func TestLoadAbout(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "about.json")
