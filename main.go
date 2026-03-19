@@ -470,6 +470,13 @@ const htmlTemplate = `<!DOCTYPE html>
 
     .form-group { margin-bottom: 1rem; }
 
+    .form-optional {
+      text-transform: none;
+      letter-spacing: 0;
+      color: #334155;
+      font-style: italic;
+    }
+
     .form-group label {
       display: block;
       font-size: 0.8rem;
@@ -556,6 +563,10 @@ const htmlTemplate = `<!DOCTYPE html>
           <div class="form-group">
             <label for="author">Name</label>
             <input type="text" id="author" name="author" placeholder="Your name" required>
+          </div>
+          <div class="form-group">
+            <label for="contact">Contact <span class="form-optional">(private, optional)</span></label>
+            <input type="text" id="contact" name="contact" placeholder="Email or handle — only visible to the author">
           </div>
           <div class="form-group">
             <label for="body">Comment</label>
