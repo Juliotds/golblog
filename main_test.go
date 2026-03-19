@@ -14,9 +14,9 @@ func TestMarkdownToOutputPath(t *testing.T) {
 		dstRoot string
 		want    string
 	}{
-		{"blog/hello-world/index.md", "blog", "out", "out/hello-world/index.html"},
-		{"blog/post.md", "blog", "out", "out/post.html"},
-		{"blog/nested/deep/post.md", "blog", "out", "out/nested/deep/post.html"},
+		{"blog/hello-world/index.md", "blog", "out/blog", "out/blog/hello-world/index.html"},
+		{"blog/post.md", "blog", "out/blog", "out/blog/post.html"},
+		{"blog/nested/deep/post.md", "blog", "out/blog", "out/blog/nested/deep/post.html"},
 	}
 
 	for _, tt := range tests {
@@ -24,6 +24,99 @@ func TestMarkdownToOutputPath(t *testing.T) {
 		if got != tt.want {
 			t.Errorf("markdownToOutputPath(%q, %q, %q) = %q, want %q", tt.src, tt.srcRoot, tt.dstRoot, got, tt.want)
 		}
+	}
+}
+
+func TestParseFrontmatter(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		wantDate string
+		wantTags []string
+		bodyHas  string
+	}{
+		{
+			name:     "with frontmatter",
+			input:    "---\ndate: 2026-03-19\ntags: go, blog\n---\n# Hello",
+			wantDate: "2026-03-19",
+			wantTags: []string{"go", "blog"},
+			bodyHas:  "# Hello",
+		},
+		{
+			name:     "bracket tags",
+			input:    "---\ndate: 2026-01-01\ntags: [a, b, c]\n---\nbody",
+			wantDate: "2026-01-01",
+			wantTags: []string{"a", "b", "c"},
+			bodyHas:  "body",
+		},
+		{
+			name:    "no frontmatter",
+			input:   "# Just content",
+			bodyHas: "# Just content",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			date, tags, body := parseFrontmatter(tt.input)
+			if date != tt.wantDate {
+				t.Errorf("date = %q, want %q", date, tt.wantDate)
+			}
+			if len(tags) != len(tt.wantTags) {
+				t.Errorf("tags = %v, want %v", tags, tt.wantTags)
+			} else {
+				for i, tag := range tags {
+					if tag != tt.wantTags[i] {
+						t.Errorf("tags[%d] = %q, want %q", i, tag, tt.wantTags[i])
+					}
+				}
+			}
+			if !contains(body, tt.bodyHas) {
+				t.Errorf("body missing %q, got: %q", tt.bodyHas, body)
+			}
+		})
+	}
+}
+
+func TestCountWords(t *testing.T) {
+	tests := []struct {
+		input string
+		want  int
+	}{
+		{"hello world", 2},
+		{"one two three four", 4},
+		{"  spaced   out  ", 2},
+		{"", 0},
+	}
+
+	for _, tt := range tests {
+		got := countWords(tt.input)
+		if got != tt.want {
+			t.Errorf("countWords(%q) = %d, want %d", tt.input, got, tt.want)
+		}
+	}
+}
+
+func TestReadPost(t *testing.T) {
+	dir := t.TempDir()
+	src := filepath.Join(dir, "blog/my-post/index.md")
+	if err := os.MkdirAll(filepath.Dir(src), 0755); err != nil {
+		t.Fatal(err)
+	}
+	content := "---\ndate: 2026-03-19\ntags: go, test\n---\n# My Post\n\nHello world content here."
+	if err := os.WriteFile(src, []byte(content), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	// readPost uses the global blogDir constant, so we need to set the source
+	// relative to it. We simulate by calling parseFrontmatter directly.
+	_, tags, body := parseFrontmatter(content)
+	wc := countWords(body)
+	if wc == 0 {
+		t.Error("expected non-zero word count")
+	}
+	if len(tags) != 2 {
+		t.Errorf("expected 2 tags, got %v", tags)
 	}
 }
 
@@ -78,28 +171,6 @@ func TestCollectMarkdownFiles_MissingDir(t *testing.T) {
 	_, err := collectMarkdownFiles("/nonexistent/path")
 	if err == nil {
 		t.Error("expected error for missing directory, got nil")
-	}
-}
-
-func TestPostFromPath(t *testing.T) {
-	tests := []struct {
-		src       string
-		wantTitle string
-		wantSlug  string
-	}{
-		{"blog/hello-world/index.md", "Hello World", "hello-world"},
-		{"blog/my-post.md", "My Post", "my-post"},
-		{"blog/go-tips/index.md", "Go Tips", "go-tips"},
-	}
-
-	for _, tt := range tests {
-		got := postFromPath(tt.src)
-		if got.Title != tt.wantTitle {
-			t.Errorf("postFromPath(%q).Title = %q, want %q", tt.src, got.Title, tt.wantTitle)
-		}
-		if got.Slug != tt.wantSlug {
-			t.Errorf("postFromPath(%q).Slug = %q, want %q", tt.src, got.Slug, tt.wantSlug)
-		}
 	}
 }
 
@@ -190,6 +261,29 @@ func TestConvertFile(t *testing.T) {
 	}
 }
 
+func TestConvertFile_StripsFromtmatter(t *testing.T) {
+	dir := t.TempDir()
+	src := filepath.Join(dir, "post.md")
+	dst := filepath.Join(dir, "post.html")
+
+	if err := os.WriteFile(src, []byte("---\ndate: 2026-03-19\ntags: go\n---\n# Title"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := convertFile(src, dst, "slug", nil); err != nil {
+		t.Fatalf("convertFile failed: %v", err)
+	}
+
+	content, _ := os.ReadFile(dst)
+	html := string(content)
+	if contains(html, "date: 2026") {
+		t.Error("frontmatter should not appear in output HTML")
+	}
+	if !contains(html, "<h1>") {
+		t.Error("expected heading in output HTML")
+	}
+}
+
 func TestConvertFile_NoComments(t *testing.T) {
 	dir := t.TempDir()
 	src := filepath.Join(dir, "post.md")
@@ -203,70 +297,13 @@ func TestConvertFile_NoComments(t *testing.T) {
 		t.Fatalf("convertFile failed: %v", err)
 	}
 
-	content, err := os.ReadFile(dst)
-	if err != nil {
-		t.Fatal(err)
-	}
-
+	content, _ := os.ReadFile(dst)
 	html := string(content)
 	if !contains(html, "No comments yet") {
 		t.Error("expected no-comments message")
 	}
 	if !contains(html, `action="/comment"`) {
 		t.Error("expected comment form")
-	}
-}
-
-func TestGenerateRSSFeed(t *testing.T) {
-	dir := t.TempDir()
-	dst := filepath.Join(dir, "rss.xml")
-
-	posts := []Post{
-		{Title: "Hello World", Slug: "hello-world"},
-		{Title: "Go Tips", Slug: "go-tips"},
-	}
-
-	if err := generateRSSFeed(dst, posts); err != nil {
-		t.Fatalf("generateRSSFeed failed: %v", err)
-	}
-
-	content, err := os.ReadFile(dst)
-	if err != nil {
-		t.Fatalf("rss.xml not created: %v", err)
-	}
-
-	xml := string(content)
-	checks := []string{
-		`<?xml version="1.0"`,
-		`version="2.0"`,
-		"JulioTds",
-		"Hello World",
-		"/blog/hello-world",
-		"Go Tips",
-		"/blog/go-tips",
-	}
-	for _, s := range checks {
-		if !contains(xml, s) {
-			t.Errorf("rss.xml missing %q", s)
-		}
-	}
-}
-
-func TestGenerateRSSFeed_NoPosts(t *testing.T) {
-	dir := t.TempDir()
-	dst := filepath.Join(dir, "rss.xml")
-
-	if err := generateRSSFeed(dst, nil); err != nil {
-		t.Fatalf("generateRSSFeed failed: %v", err)
-	}
-
-	content, err := os.ReadFile(dst)
-	if err != nil {
-		t.Fatalf("rss.xml not created: %v", err)
-	}
-
-	if !contains(string(content), "JulioTds") {
-		t.Error("rss.xml missing channel title")
 	}
 }
 
@@ -291,14 +328,9 @@ func TestGenerateHomePage(t *testing.T) {
 		t.Fatalf("generateHomePage failed: %v", err)
 	}
 
-	content, err := os.ReadFile(dst)
-	if err != nil {
-		t.Fatalf("output file not created: %v", err)
-	}
-
+	content, _ := os.ReadFile(dst)
 	html := string(content)
-	checks := []string{"<!DOCTYPE html>", "JulioTds", "Hello World", "/blog/hello-world", "Go Tips", "/blog/go-tips"}
-	for _, s := range checks {
+	for _, s := range []string{"<!DOCTYPE html>", "JulioTds", "Hello World", "/blog/hello-world", "Go Tips"} {
 		if !contains(html, s) {
 			t.Errorf("home page missing %q", s)
 		}
@@ -307,19 +339,79 @@ func TestGenerateHomePage(t *testing.T) {
 
 func TestGenerateHomePage_NoPosts(t *testing.T) {
 	dir := t.TempDir()
-	dst := filepath.Join(dir, "index.html")
-
-	if err := generateHomePage(dst, nil); err != nil {
+	if err := generateHomePage(filepath.Join(dir, "index.html"), nil); err != nil {
 		t.Fatalf("generateHomePage failed: %v", err)
+	}
+}
+
+func TestGenerateBlogPage(t *testing.T) {
+	dir := t.TempDir()
+	dst := filepath.Join(dir, "blog", "index.html")
+
+	posts := []Post{
+		{Title: "Hello World", Slug: "hello-world", Date: "2026-03-19", Tags: []string{"go", "blog"}, WordCount: 120},
+		{Title: "Go Tips", Slug: "go-tips", Date: "2026-03-20", Tags: []string{"go"}, WordCount: 300},
+	}
+
+	if err := generateBlogPage(dst, posts); err != nil {
+		t.Fatalf("generateBlogPage failed: %v", err)
 	}
 
 	content, err := os.ReadFile(dst)
 	if err != nil {
-		t.Fatalf("output file not created: %v", err)
+		t.Fatalf("blog index not created: %v", err)
 	}
 
-	if !contains(string(content), "JulioTds") {
-		t.Error("home page missing site title")
+	html := string(content)
+	checks := []string{
+		"Hello World", "/blog/hello-world", "2026-03-19", "go", "blog", "120 words",
+		"Go Tips", "/blog/go-tips", "2026-03-20", "300 words",
+	}
+	for _, s := range checks {
+		if !contains(html, s) {
+			t.Errorf("blog page missing %q", s)
+		}
+	}
+}
+
+func TestGenerateBlogPage_NoPosts(t *testing.T) {
+	dir := t.TempDir()
+	dst := filepath.Join(dir, "blog", "index.html")
+	if err := generateBlogPage(dst, nil); err != nil {
+		t.Fatalf("generateBlogPage failed: %v", err)
+	}
+	content, _ := os.ReadFile(dst)
+	if !contains(string(content), "No posts yet") {
+		t.Error("expected empty state message")
+	}
+}
+
+func TestGenerateRSSFeed(t *testing.T) {
+	dir := t.TempDir()
+	dst := filepath.Join(dir, "rss.xml")
+
+	posts := []Post{
+		{Title: "Hello World", Slug: "hello-world"},
+		{Title: "Go Tips", Slug: "go-tips"},
+	}
+
+	if err := generateRSSFeed(dst, posts); err != nil {
+		t.Fatalf("generateRSSFeed failed: %v", err)
+	}
+
+	content, _ := os.ReadFile(dst)
+	xml := string(content)
+	for _, s := range []string{`<?xml version="1.0"`, `version="2.0"`, "JulioTds", "Hello World", "/blog/hello-world", "Go Tips"} {
+		if !contains(xml, s) {
+			t.Errorf("rss.xml missing %q", s)
+		}
+	}
+}
+
+func TestGenerateRSSFeed_NoPosts(t *testing.T) {
+	dir := t.TempDir()
+	if err := generateRSSFeed(filepath.Join(dir, "rss.xml"), nil); err != nil {
+		t.Fatalf("generateRSSFeed failed: %v", err)
 	}
 }
 

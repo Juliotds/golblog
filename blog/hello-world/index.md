@@ -1,3 +1,8 @@
+---
+date: 2026-03-19
+tags: go, blog, static-site
+---
+
 # Hello, World!
 
 Welcome to my blog. This is the first post.

@@ -51,10 +51,7 @@ const htmlTemplate = `<!DOCTYPE html>
       letter-spacing: 0.02em;
     }
 
-    nav {
-      display: flex;
-      gap: 0.25rem;
-    }
+    nav { display: flex; align-items: center; gap: 0.25rem; }
 
     nav a {
       color: #94a3b8;
@@ -65,10 +62,25 @@ const htmlTemplate = `<!DOCTYPE html>
       transition: background 0.15s, color 0.15s;
     }
 
-    nav a:hover {
-      background: #2d3748;
-      color: #e2e8f0;
+    nav a:hover { background: #2d3748; color: #e2e8f0; }
+
+    .rss-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      color: #f97316;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      padding: 0.35rem 0.75rem;
+      border: 1px solid #431407;
+      border-radius: 6px;
+      transition: background 0.15s, border-color 0.15s;
+      margin-left: 0.75rem;
     }
+
+    .rss-btn:hover { background: #431407; text-decoration: none; }
+    .rss-btn svg { flex-shrink: 0; }
 
     main {
       max-width: 760px;
@@ -122,11 +134,7 @@ const htmlTemplate = `<!DOCTYPE html>
       border-radius: 0 6px 6px 0;
     }
 
-    hr {
-      border: none;
-      border-top: 1px solid #2d3748;
-      margin: 2rem 0;
-    }
+    hr { border: none; border-top: 1px solid #2d3748; margin: 2rem 0; }
 
     footer {
       background: #161b27;
@@ -139,12 +147,9 @@ const htmlTemplate = `<!DOCTYPE html>
     }
 
     footer a { color: #64748b; }
+    footer a:hover { color: #a78bfa; text-decoration: none; }
 
-    footer a:hover {
-      color: #a78bfa;
-      text-decoration: none;
-    }
-
+    /* Home */
     .hero {
       padding: 4rem 0 3rem;
       border-bottom: 1px solid #2d3748;
@@ -160,11 +165,7 @@ const htmlTemplate = `<!DOCTYPE html>
       background-clip: text;
     }
 
-    .hero p {
-      font-size: 1.1rem;
-      color: #64748b;
-      margin: 0;
-    }
+    .hero p { font-size: 1.1rem; color: #64748b; margin: 0; }
 
     .posts-section h2 {
       font-size: 1rem;
@@ -174,12 +175,7 @@ const htmlTemplate = `<!DOCTYPE html>
       margin: 0 0 1.25rem;
     }
 
-    .post-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-
+    .post-list { list-style: none; padding: 0; margin: 0; }
     .post-list li { border-bottom: 1px solid #1e2535; }
 
     .post-list a {
@@ -201,28 +197,68 @@ const htmlTemplate = `<!DOCTYPE html>
       font-family: "JetBrains Mono", monospace;
     }
 
-    /* RSS button */
-    .rss-btn {
+    /* Blog listing */
+    .blog-header {
+      padding: 2.5rem 0 2rem;
+      border-bottom: 1px solid #2d3748;
+      margin-bottom: 2rem;
+    }
+
+    .blog-header h1 { margin: 0 0 0.25rem; font-size: 2rem; }
+    .blog-header p { margin: 0; color: #64748b; }
+
+    .blog-list { list-style: none; padding: 0; margin: 0; }
+
+    .blog-list li { border-bottom: 1px solid #1e2535; }
+
+    .blog-list a {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      grid-template-rows: auto auto;
+      gap: 0.25rem 1rem;
+      padding: 1.25rem 0;
+      color: inherit;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    .blog-list a:hover .blog-post-title { color: #a78bfa; }
+
+    .blog-post-title {
+      font-size: 1rem;
+      font-weight: 500;
+      color: #e2e8f0;
+      transition: color 0.15s;
+    }
+
+    .blog-post-date {
+      font-size: 0.82rem;
+      color: #475569;
+      font-family: "JetBrains Mono", monospace;
+      text-align: right;
+      align-self: start;
+    }
+
+    .blog-post-meta {
       display: flex;
       align-items: center;
-      gap: 0.35rem;
-      color: #f97316;
-      text-decoration: none;
-      font-size: 0.85rem;
-      font-weight: 500;
-      padding: 0.35rem 0.75rem;
-      border: 1px solid #431407;
-      border-radius: 6px;
-      transition: background 0.15s, border-color 0.15s;
-      margin-left: 0.75rem;
+      gap: 0.5rem;
+      flex-wrap: wrap;
     }
 
-    .rss-btn:hover {
-      background: #431407;
-      text-decoration: none;
+    .blog-post-words {
+      font-size: 0.78rem;
+      color: #475569;
     }
 
-    .rss-btn svg { flex-shrink: 0; }
+    .tag {
+      font-size: 0.72rem;
+      padding: 0.15em 0.55em;
+      border-radius: 999px;
+      background: #1e2535;
+      color: #7dd3fc;
+      border: 1px solid #2d3748;
+    }
 
     /* Comments */
     .comments {
@@ -247,34 +283,11 @@ const htmlTemplate = `<!DOCTYPE html>
       margin-bottom: 1rem;
     }
 
-    .comment-meta {
-      display: flex;
-      gap: 1rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .comment-author {
-      font-weight: 600;
-      color: #a78bfa;
-      font-size: 0.9rem;
-    }
-
-    .comment-date {
-      color: #475569;
-      font-size: 0.85rem;
-    }
-
-    .comment-body {
-      color: #cbd5e1;
-      font-size: 0.95rem;
-      margin: 0;
-    }
-
-    .no-comments {
-      color: #475569;
-      font-size: 0.9rem;
-      margin-bottom: 1.5rem;
-    }
+    .comment-meta { display: flex; gap: 1rem; margin-bottom: 0.5rem; }
+    .comment-author { font-weight: 600; color: #a78bfa; font-size: 0.9rem; }
+    .comment-date { color: #475569; font-size: 0.85rem; }
+    .comment-body { color: #cbd5e1; font-size: 0.95rem; margin: 0; }
+    .no-comments { color: #475569; font-size: 0.9rem; margin-bottom: 1.5rem; }
 
     /* Comment form */
     .comment-form {
@@ -292,9 +305,7 @@ const htmlTemplate = `<!DOCTYPE html>
       font-weight: 500;
     }
 
-    .form-group {
-      margin-bottom: 1rem;
-    }
+    .form-group { margin-bottom: 1rem; }
 
     .form-group label {
       display: block;
@@ -320,14 +331,9 @@ const htmlTemplate = `<!DOCTYPE html>
     }
 
     .form-group input:focus,
-    .form-group textarea:focus {
-      border-color: #a78bfa;
-    }
+    .form-group textarea:focus { border-color: #a78bfa; }
 
-    .form-group textarea {
-      resize: vertical;
-      min-height: 100px;
-    }
+    .form-group textarea { resize: vertical; min-height: 100px; }
 
     .form-submit {
       background: #a78bfa;
@@ -353,14 +359,14 @@ const htmlTemplate = `<!DOCTYPE html>
       <a href="/projects">Projects</a>
       <a href="/blog">Blog</a>
       <a href="/contact">Contact</a>
+      <a class="rss-btn" href="/rss.xml">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+          <circle cx="6.18" cy="17.82" r="2.18"/>
+          <path d="M4 4.44v2.83c7.03 0 12.73 5.7 12.73 12.73h2.83c0-8.59-6.97-15.56-15.56-15.56zm0 5.66v2.83c3.9 0 7.07 3.17 7.07 7.07h2.83c0-5.47-4.43-9.9-9.9-9.9z"/>
+        </svg>
+        RSS
+      </a>
     </nav>
-    <a class="rss-btn" href="/rss.xml">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-        <circle cx="6.18" cy="17.82" r="2.18"/>
-        <path d="M4 4.44v2.83c7.03 0 12.73 5.7 12.73 12.73h2.83c0-8.59-6.97-15.56-15.56-15.56zm0 5.66v2.83c3.9 0 7.07 3.17 7.07 7.07h2.83c0-5.47-4.43-9.9-9.9-9.9z"/>
-      </svg>
-      RSS
-    </a>
   </header>
   <main>
     {{.Content}}
@@ -424,15 +430,60 @@ const homeContent = `<div class="hero">
 </section>
 {{end}}`
 
+const blogListContent = `<div class="blog-header">
+  <h1>Blog</h1>
+  <p>All posts, sorted by date.</p>
+</div>
+{{if .Posts}}
+<ul class="blog-list">
+  {{range .Posts}}
+  <li>
+    <a href="/blog/{{.Slug}}">
+      <span class="blog-post-title">{{.Title}}</span>
+      <span class="blog-post-date">{{if .Date}}{{.Date}}{{else}}&mdash;{{end}}</span>
+      <span class="blog-post-meta">
+        <span class="blog-post-words">{{.WordCount}} words</span>
+        {{range .Tags}}<span class="tag">{{.}}</span>{{end}}
+      </span>
+    </a>
+  </li>
+  {{end}}
+</ul>
+{{else}}
+  <p style="color:#475569">No posts yet.</p>
+{{end}}`
+
 var pageTmpl = template.Must(template.New("page").Parse(htmlTemplate))
 var homeTmpl = template.Must(template.New("home").Parse(homeContent))
+var blogListTmpl = template.Must(template.New("blogList").Parse(blogListContent))
 
 const (
 	blogDir      = "blog"
 	outDir       = "out"
+	outBlogDir   = "out/blog"
 	commentsFile = "blog/comments.json"
 	baseURL      = "https://juliotds.com"
 )
+
+type Comment struct {
+	Author string `json:"author"`
+	Body   string `json:"body"`
+	Date   string `json:"date"`
+}
+
+type PageData struct {
+	Content  template.HTML
+	Comments []Comment
+	Slug     string
+}
+
+type Post struct {
+	Title     string
+	Slug      string
+	Date      string
+	Tags      []string
+	WordCount int
+}
 
 type rssItem struct {
 	XMLName xml.Name `xml:"item"`
@@ -455,23 +506,6 @@ type rssFeed struct {
 	Channel rssChannel
 }
 
-type Comment struct {
-	Author string `json:"author"`
-	Body   string `json:"body"`
-	Date   string `json:"date"`
-}
-
-type PageData struct {
-	Content  template.HTML
-	Comments []Comment
-	Slug     string
-}
-
-type Post struct {
-	Title string
-	Slug  string
-}
-
 func main() {
 	if err := run(); err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
@@ -492,8 +526,11 @@ func run() error {
 
 	var posts []Post
 	for _, src := range entries {
-		post := postFromPath(src)
-		dst := markdownToOutputPath(src, blogDir, outDir)
+		post, err := readPost(src)
+		if err != nil {
+			return fmt.Errorf("reading %s: %w", src, err)
+		}
+		dst := markdownToOutputPath(src, blogDir, outBlogDir)
 		if err := convertFile(src, dst, post.Slug, allComments[post.Slug]); err != nil {
 			return fmt.Errorf("converting %s: %w", src, err)
 		}
@@ -501,19 +538,81 @@ func run() error {
 		posts = append(posts, post)
 	}
 
-	dst := filepath.Join(outDir, "index.html")
-	if err := generateHomePage(dst, posts); err != nil {
+	if err := generateHomePage(filepath.Join(outDir, "index.html"), posts); err != nil {
 		return fmt.Errorf("generating home page: %w", err)
 	}
-	fmt.Printf("home -> %s\n", dst)
+	fmt.Printf("home -> out/index.html\n")
 
-	rssDst := filepath.Join(outDir, "rss.xml")
-	if err := generateRSSFeed(rssDst, posts); err != nil {
+	if err := generateBlogPage(filepath.Join(outBlogDir, "index.html"), posts); err != nil {
+		return fmt.Errorf("generating blog page: %w", err)
+	}
+	fmt.Printf("blog -> out/blog/index.html\n")
+
+	if err := generateRSSFeed(filepath.Join(outDir, "rss.xml"), posts); err != nil {
 		return fmt.Errorf("generating RSS feed: %w", err)
 	}
-	fmt.Printf("rss  -> %s\n", rssDst)
+	fmt.Printf("rss  -> out/rss.xml\n")
 
 	return nil
+}
+
+// readPost reads a markdown file, parses frontmatter, and returns a Post with metadata.
+func readPost(src string) (Post, error) {
+	raw, err := os.ReadFile(src)
+	if err != nil {
+		return Post{}, err
+	}
+
+	date, tags, body := parseFrontmatter(string(raw))
+
+	rel, _ := filepath.Rel(blogDir, src)
+	parts := strings.Split(filepath.ToSlash(rel), "/")
+	slug := strings.TrimSuffix(parts[0], ".md")
+	title := strings.Title(strings.ReplaceAll(slug, "-", " "))
+
+	return Post{
+		Title:     title,
+		Slug:      slug,
+		Date:      date,
+		Tags:      tags,
+		WordCount: countWords(body),
+	}, nil
+}
+
+// parseFrontmatter splits YAML frontmatter from the body.
+// Returns date, tags, and the remaining body content.
+func parseFrontmatter(raw string) (date string, tags []string, body string) {
+	if !strings.HasPrefix(raw, "---") {
+		return "", nil, raw
+	}
+	rest := raw[3:]
+	end := strings.Index(rest, "---")
+	if end == -1 {
+		return "", nil, raw
+	}
+
+	fm := rest[:end]
+	body = strings.TrimSpace(rest[end+3:])
+
+	for _, line := range strings.Split(fm, "\n") {
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, "date:") {
+			date = strings.TrimSpace(strings.TrimPrefix(line, "date:"))
+		} else if strings.HasPrefix(line, "tags:") {
+			raw := strings.TrimSpace(strings.TrimPrefix(line, "tags:"))
+			raw = strings.Trim(raw, "[]")
+			for _, t := range strings.Split(raw, ",") {
+				if t = strings.TrimSpace(t); t != "" {
+					tags = append(tags, t)
+				}
+			}
+		}
+	}
+	return date, tags, body
+}
+
+func countWords(s string) int {
+	return len(strings.Fields(s))
 }
 
 func loadComments(path string) (map[string][]Comment, error) {
@@ -532,31 +631,27 @@ func loadComments(path string) (map[string][]Comment, error) {
 	return comments, nil
 }
 
-func postFromPath(src string) Post {
-	rel, _ := filepath.Rel(blogDir, src)
-	parts := strings.Split(filepath.ToSlash(rel), "/")
-	slug := strings.TrimSuffix(parts[0], ".md")
-	title := strings.ReplaceAll(slug, "-", " ")
-	title = strings.Title(title)
-	return Post{Title: title, Slug: slug}
+func generateHomePage(dst string, posts []Post) error {
+	return renderPage(dst, homeTmpl, struct{ Posts []Post }{Posts: posts})
 }
 
-func generateHomePage(dst string, posts []Post) error {
+func generateBlogPage(dst string, posts []Post) error {
+	return renderPage(dst, blogListTmpl, struct{ Posts []Post }{Posts: posts})
+}
+
+func renderPage(dst string, tmpl *template.Template, data any) error {
 	var body bytes.Buffer
-	if err := homeTmpl.Execute(&body, struct{ Posts []Post }{Posts: posts}); err != nil {
+	if err := tmpl.Execute(&body, data); err != nil {
 		return err
 	}
-
 	if err := os.MkdirAll(filepath.Dir(dst), 0755); err != nil {
 		return err
 	}
-
 	f, err := os.Create(dst)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-
 	return pageTmpl.Execute(f, PageData{Content: template.HTML(body.String())})
 }
 
@@ -617,8 +712,11 @@ func convertFile(src, dst, slug string, comments []Comment) error {
 		return err
 	}
 
-	var body bytes.Buffer
-	if err := goldmark.Convert(input, &body); err != nil {
+	// Strip frontmatter before converting
+	_, _, body := parseFrontmatter(string(input))
+
+	var buf bytes.Buffer
+	if err := goldmark.Convert([]byte(body), &buf); err != nil {
 		return err
 	}
 
@@ -633,7 +731,7 @@ func convertFile(src, dst, slug string, comments []Comment) error {
 	defer f.Close()
 
 	return pageTmpl.Execute(f, PageData{
-		Content:  template.HTML(body.String()),
+		Content:  template.HTML(buf.String()),
 		Comments: comments,
 		Slug:     slug,
 	})
