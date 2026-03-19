@@ -386,6 +386,92 @@ func TestGenerateBlogPage_NoPosts(t *testing.T) {
 	}
 }
 
+func TestLoadProjects(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "projects.json")
+
+	data := []Project{
+		{Name: "golblog", Description: "A static site generator", URL: "https://github.com/x/golblog", Tags: []string{"go"}, Year: "2026"},
+	}
+	raw, _ := json.Marshal(data)
+	if err := os.WriteFile(path, raw, 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := loadProjects(path)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(got) != 1 {
+		t.Fatalf("expected 1 project, got %d", len(got))
+	}
+	if got[0].Name != "golblog" {
+		t.Errorf("expected name golblog, got %q", got[0].Name)
+	}
+}
+
+func TestLoadProjects_MissingFile(t *testing.T) {
+	got, err := loadProjects("/nonexistent/projects.json")
+	if err != nil {
+		t.Fatalf("expected no error for missing file, got %v", err)
+	}
+	if got != nil {
+		t.Errorf("expected nil, got %v", got)
+	}
+}
+
+func TestLoadProjects_InvalidJSON(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "projects.json")
+	if err := os.WriteFile(path, []byte("not json"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	_, err := loadProjects(path)
+	if err == nil {
+		t.Error("expected error for invalid JSON, got nil")
+	}
+}
+
+func TestGenerateProjectsPage(t *testing.T) {
+	dir := t.TempDir()
+	dst := filepath.Join(dir, "projects", "index.html")
+
+	projects := []Project{
+		{Name: "golblog", Description: "Static site generator", URL: "https://github.com/x/golblog", Tags: []string{"go", "blog"}, Year: "2026"},
+	}
+
+	if err := generateProjectsPage(dst, projects); err != nil {
+		t.Fatalf("generateProjectsPage failed: %v", err)
+	}
+
+	content, err := os.ReadFile(dst)
+	if err != nil {
+		t.Fatalf("projects page not created: %v", err)
+	}
+
+	html := string(content)
+	checks := []string{"golblog", "Static site generator", "https://github.com/x/golblog", "go", "blog", "2026"}
+	for _, s := range checks {
+		if !contains(html, s) {
+			t.Errorf("projects page missing %q", s)
+		}
+	}
+}
+
+func TestGenerateProjectsPage_NoProjects(t *testing.T) {
+	dir := t.TempDir()
+	dst := filepath.Join(dir, "projects", "index.html")
+
+	if err := generateProjectsPage(dst, nil); err != nil {
+		t.Fatalf("generateProjectsPage failed: %v", err)
+	}
+
+	content, _ := os.ReadFile(dst)
+	if !contains(string(content), "No projects yet") {
+		t.Error("expected empty state message")
+	}
+}
+
 func TestGenerateRSSFeed(t *testing.T) {
 	dir := t.TempDir()
 	dst := filepath.Join(dir, "rss.xml")

@@ -260,6 +260,67 @@ const htmlTemplate = `<!DOCTYPE html>
       border: 1px solid #2d3748;
     }
 
+    /* Projects */
+    .projects-header {
+      padding: 2.5rem 0 2rem;
+      border-bottom: 1px solid #2d3748;
+      margin-bottom: 2rem;
+    }
+
+    .projects-header h1 { margin: 0 0 0.25rem; font-size: 2rem; }
+    .projects-header p { margin: 0; color: #64748b; }
+
+    .project-grid {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .project-card {
+      background: #161b27;
+      border: 1px solid #2d3748;
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      text-decoration: none;
+      display: block;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .project-card:hover {
+      border-color: #a78bfa;
+      background: #1a1f30;
+      text-decoration: none;
+    }
+
+    .project-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .project-name {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #e2e8f0;
+    }
+
+    .project-year {
+      font-size: 0.78rem;
+      color: #475569;
+      font-family: "JetBrains Mono", monospace;
+      white-space: nowrap;
+    }
+
+    .project-desc {
+      font-size: 0.9rem;
+      color: #94a3b8;
+      margin: 0 0 0.85rem;
+      line-height: 1.6;
+    }
+
+    .project-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+
     /* Comments */
     .comments {
       margin-top: 4rem;
@@ -453,15 +514,40 @@ const blogListContent = `<div class="blog-header">
   <p style="color:#475569">No posts yet.</p>
 {{end}}`
 
+const projectsContent = `<div class="projects-header">
+  <h1>Projects</h1>
+  <p>Things I&#39;ve built.</p>
+</div>
+{{if .Projects}}
+<div class="project-grid">
+  {{range .Projects}}
+  <a class="project-card" {{if .URL}}href="{{.URL}}" target="_blank" rel="noopener"{{end}}>
+    <div class="project-card-top">
+      <span class="project-name">{{.Name}}</span>
+      {{if .Year}}<span class="project-year">{{.Year}}</span>{{end}}
+    </div>
+    <p class="project-desc">{{.Description}}</p>
+    <div class="project-tags">
+      {{range .Tags}}<span class="tag">{{.}}</span>{{end}}
+    </div>
+  </a>
+  {{end}}
+</div>
+{{else}}
+  <p style="color:#475569">No projects yet.</p>
+{{end}}`
+
 var pageTmpl = template.Must(template.New("page").Parse(htmlTemplate))
 var homeTmpl = template.Must(template.New("home").Parse(homeContent))
 var blogListTmpl = template.Must(template.New("blogList").Parse(blogListContent))
+var projectsTmpl = template.Must(template.New("projects").Parse(projectsContent))
 
 const (
 	blogDir      = "blog"
 	outDir       = "out"
 	outBlogDir   = "out/blog"
 	commentsFile = "blog/comments.json"
+	projectsFile = "projects.json"
 	baseURL      = "https://juliotds.com"
 )
 
@@ -475,6 +561,14 @@ type PageData struct {
 	Content  template.HTML
 	Comments []Comment
 	Slug     string
+}
+
+type Project struct {
+	Name        string   `json:"name"`
+	Description string   `json:"description"`
+	URL         string   `json:"url"`
+	Tags        []string `json:"tags"`
+	Year        string   `json:"year"`
 }
 
 type Post struct {
@@ -519,6 +613,11 @@ func run() error {
 		return fmt.Errorf("loading comments: %w", err)
 	}
 
+	projects, err := loadProjects(projectsFile)
+	if err != nil {
+		return fmt.Errorf("loading projects: %w", err)
+	}
+
 	entries, err := collectMarkdownFiles(blogDir)
 	if err != nil {
 		return fmt.Errorf("collecting markdown files: %w", err)
@@ -547,6 +646,11 @@ func run() error {
 		return fmt.Errorf("generating blog page: %w", err)
 	}
 	fmt.Printf("blog -> out/blog/index.html\n")
+
+	if err := generateProjectsPage(filepath.Join(outDir, "projects", "index.html"), projects); err != nil {
+		return fmt.Errorf("generating projects page: %w", err)
+	}
+	fmt.Printf("proj -> out/projects/index.html\n")
 
 	if err := generateRSSFeed(filepath.Join(outDir, "rss.xml"), posts); err != nil {
 		return fmt.Errorf("generating RSS feed: %w", err)
@@ -629,6 +733,25 @@ func loadComments(path string) (map[string][]Comment, error) {
 		return nil, err
 	}
 	return comments, nil
+}
+
+func loadProjects(path string) ([]Project, error) {
+	data, err := os.ReadFile(path)
+	if os.IsNotExist(err) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	var projects []Project
+	if err := json.Unmarshal(data, &projects); err != nil {
+		return nil, err
+	}
+	return projects, nil
+}
+
+func generateProjectsPage(dst string, projects []Project) error {
+	return renderPage(dst, projectsTmpl, struct{ Projects []Project }{Projects: projects})
 }
 
 func generateHomePage(dst string, posts []Post) error {

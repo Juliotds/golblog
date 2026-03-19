@@ -1,0 +1,9 @@
+[
+  {
+    "name": "golblog",
+    "description": "A minimalist static site generator written in Go. Converts Markdown to HTML with frontmatter support, RSS feed, and comment sections.",
+    "url": "https://github.com/Juliotds/golblog",
+    "tags": ["go", "static-site", "markdown"],
+    "year": "2026"
+  }
+]
