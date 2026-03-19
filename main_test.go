@@ -115,6 +115,73 @@ func TestConvertFile(t *testing.T) {
 	}
 }
 
+func TestPostFromPath(t *testing.T) {
+	tests := []struct {
+		src       string
+		wantTitle string
+		wantSlug  string
+	}{
+		{"blog/hello-world/index.md", "Hello World", "hello-world"},
+		{"blog/my-post.md", "My Post", "my-post"},
+		{"blog/go-tips/index.md", "Go Tips", "go-tips"},
+	}
+
+	for _, tt := range tests {
+		got := postFromPath(tt.src)
+		if got.Title != tt.wantTitle {
+			t.Errorf("postFromPath(%q).Title = %q, want %q", tt.src, got.Title, tt.wantTitle)
+		}
+		if got.Slug != tt.wantSlug {
+			t.Errorf("postFromPath(%q).Slug = %q, want %q", tt.src, got.Slug, tt.wantSlug)
+		}
+	}
+}
+
+func TestGenerateHomePage(t *testing.T) {
+	dir := t.TempDir()
+	dst := filepath.Join(dir, "index.html")
+
+	posts := []Post{
+		{Title: "Hello World", Slug: "hello-world"},
+		{Title: "Go Tips", Slug: "go-tips"},
+	}
+
+	if err := generateHomePage(dst, posts); err != nil {
+		t.Fatalf("generateHomePage failed: %v", err)
+	}
+
+	content, err := os.ReadFile(dst)
+	if err != nil {
+		t.Fatalf("output file not created: %v", err)
+	}
+
+	html := string(content)
+	checks := []string{"<!DOCTYPE html>", "JulioTds", "Hello World", "/blog/hello-world", "Go Tips", "/blog/go-tips"}
+	for _, s := range checks {
+		if !contains(html, s) {
+			t.Errorf("home page missing %q", s)
+		}
+	}
+}
+
+func TestGenerateHomePage_NoPosts(t *testing.T) {
+	dir := t.TempDir()
+	dst := filepath.Join(dir, "index.html")
+
+	if err := generateHomePage(dst, nil); err != nil {
+		t.Fatalf("generateHomePage failed: %v", err)
+	}
+
+	content, err := os.ReadFile(dst)
+	if err != nil {
+		t.Fatalf("output file not created: %v", err)
+	}
+
+	if !contains(string(content), "JulioTds") {
+		t.Error("home page missing site title")
+	}
+}
+
 func TestConvertFile_MissingSource(t *testing.T) {
 	dir := t.TempDir()
 	err := convertFile("/nonexistent/post.md", filepath.Join(dir, "out.html"))

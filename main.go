@@ -143,6 +143,65 @@ const htmlTemplate = `<!DOCTYPE html>
       color: #a78bfa;
       text-decoration: none;
     }
+
+    .hero {
+      padding: 4rem 0 3rem;
+      border-bottom: 1px solid #2d3748;
+      margin-bottom: 3rem;
+    }
+
+    .hero h1 {
+      font-size: 2.8rem;
+      margin: 0 0 0.5rem;
+      background: linear-gradient(90deg, #a78bfa, #60a5fa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      font-size: 1.1rem;
+      color: #64748b;
+      margin: 0;
+    }
+
+    .posts-section h2 {
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #475569;
+      margin: 0 0 1.25rem;
+    }
+
+    .post-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .post-list li {
+      border-bottom: 1px solid #1e2535;
+    }
+
+    .post-list a {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 0;
+      color: #e2e8f0;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    .post-list a:hover { color: #a78bfa; }
+
+    .post-list .post-title { font-size: 1rem; }
+
+    .post-list .post-slug {
+      font-size: 0.8rem;
+      color: #475569;
+      font-family: "JetBrains Mono", monospace;
+    }
   </style>
 </head>
 <body>
@@ -165,7 +224,28 @@ const htmlTemplate = `<!DOCTYPE html>
 </body>
 </html>`
 
+const homeContent = `<div class="hero">
+  <h1>JulioTds</h1>
+  <p>Developer. Builder. Writing about code, tools, and ideas.</p>
+</div>
+{{if .Posts}}
+<section class="posts-section">
+  <h2>Recent Posts</h2>
+  <ul class="post-list">
+    {{range .Posts}}
+    <li>
+      <a href="/blog/{{.Slug}}">
+        <span class="post-title">{{.Title}}</span>
+        <span class="post-slug">/blog/{{.Slug}}</span>
+      </a>
+    </li>
+    {{end}}
+  </ul>
+</section>
+{{end}}`
+
 var pageTmpl = template.Must(template.New("page").Parse(htmlTemplate))
+var homeTmpl = template.Must(template.New("home").Parse(homeContent))
 
 const (
 	blogDir = "blog"
@@ -179,21 +259,64 @@ func main() {
 	}
 }
 
+type Post struct {
+	Title string
+	Slug  string
+}
+
 func run() error {
 	entries, err := collectMarkdownFiles(blogDir)
 	if err != nil {
 		return fmt.Errorf("collecting markdown files: %w", err)
 	}
 
+	var posts []Post
 	for _, src := range entries {
 		dst := markdownToOutputPath(src, blogDir, outDir)
 		if err := convertFile(src, dst); err != nil {
 			return fmt.Errorf("converting %s: %w", src, err)
 		}
 		fmt.Printf("%s -> %s\n", src, dst)
+		posts = append(posts, postFromPath(src))
 	}
 
+	dst := filepath.Join(outDir, "index.html")
+	if err := generateHomePage(dst, posts); err != nil {
+		return fmt.Errorf("generating home page: %w", err)
+	}
+	fmt.Printf("home -> %s\n", dst)
+
 	return nil
+}
+
+func postFromPath(src string) Post {
+	rel, _ := filepath.Rel(blogDir, src)
+	parts := strings.Split(filepath.ToSlash(rel), "/")
+	slug := strings.TrimSuffix(parts[0], ".md")
+	title := strings.ReplaceAll(slug, "-", " ")
+	title = strings.Title(title)
+	return Post{Title: title, Slug: slug}
+}
+
+func generateHomePage(dst string, posts []Post) error {
+	var body bytes.Buffer
+	if err := homeTmpl.Execute(&body, struct{ Posts []Post }{Posts: posts}); err != nil {
+		return err
+	}
+
+	if err := os.MkdirAll(filepath.Dir(dst), 0755); err != nil {
+		return err
+	}
+
+	f, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	return pageTmpl.Execute(f, struct{ Content template.HTML }{
+		Content: template.HTML(body.String()),
+	})
 }
 
 func collectMarkdownFiles(root string) ([]string, error) {
