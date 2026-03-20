@@ -891,6 +891,10 @@ func main() {
 }
 
 func run() error {
+	if err := os.RemoveAll(outDir); err != nil {
+		return fmt.Errorf("cleaning out dir: %w", err)
+	}
+
 	allComments, err := loadComments(commentsFile)
 	if err != nil {
 		return fmt.Errorf("loading comments: %w", err)
