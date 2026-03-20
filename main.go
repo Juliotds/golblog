@@ -24,15 +24,15 @@ const htmlTemplate = `<!DOCTYPE html>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      background: #0f1117;
-      color: #e2e8f0;
+      background: #09080d;
+      color: #ecdcc8;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       line-height: 1.7;
     }
 
     header {
-      background: #161b27;
-      border-bottom: 1px solid #2d3748;
+      background: #120f18;
+      border-bottom: 1px solid #2e2438;
       padding: 0 2rem;
       display: flex;
       align-items: center;
@@ -46,7 +46,7 @@ const htmlTemplate = `<!DOCTYPE html>
     header .logo {
       font-size: 1.2rem;
       font-weight: 700;
-      color: #a78bfa;
+      color: #e85218;
       text-decoration: none;
       letter-spacing: 0.02em;
     }
@@ -54,7 +54,7 @@ const htmlTemplate = `<!DOCTYPE html>
     nav { display: flex; align-items: center; gap: 0.25rem; }
 
     nav a {
-      color: #94a3b8;
+      color: #9a8070;
       text-decoration: none;
       padding: 0.4rem 0.85rem;
       border-radius: 6px;
@@ -62,14 +62,14 @@ const htmlTemplate = `<!DOCTYPE html>
       transition: background 0.15s, color 0.15s;
     }
 
-    nav a:hover { background: #2d3748; color: #e2e8f0; }
+    nav a:hover { background: #2e2438; color: #ecdcc8; }
 
     .rss-btn {
       display: flex;
       align-items: center;
       gap: 0.35rem;
       color: #fff;
-      background: #ea580c;
+      background: #c41808;
       text-decoration: none;
       font-size: 0.85rem;
       font-weight: 600;
@@ -79,7 +79,7 @@ const htmlTemplate = `<!DOCTYPE html>
       margin-left: 0.75rem;
     }
 
-    .rss-btn:hover { background: #c2410c; text-decoration: none; }
+    .rss-btn:hover { background: #991005; text-decoration: none; }
     .rss-btn svg { flex-shrink: 0; }
 
     main {
@@ -89,7 +89,7 @@ const htmlTemplate = `<!DOCTYPE html>
     }
 
     h1, h2, h3, h4 {
-      color: #f1f5f9;
+      color: #f0e0cc;
       font-weight: 600;
       margin: 2rem 0 0.75rem;
       line-height: 1.3;
@@ -98,14 +98,14 @@ const htmlTemplate = `<!DOCTYPE html>
     h2 { font-size: 1.4rem; }
     h3 { font-size: 1.15rem; }
 
-    p { margin-bottom: 1rem; color: #cbd5e1; }
+    p { margin-bottom: 1rem; color: #c4a888; }
 
-    a { color: #a78bfa; text-decoration: none; }
+    a { color: #e85218; text-decoration: none; }
     a:hover { text-decoration: underline; }
 
     code {
-      background: #1e2535;
-      color: #7dd3fc;
+      background: #1e1828;
+      color: #e89828;
       padding: 0.15em 0.4em;
       border-radius: 4px;
       font-size: 0.88em;
@@ -113,8 +113,8 @@ const htmlTemplate = `<!DOCTYPE html>
     }
 
     pre {
-      background: #1e2535;
-      border: 1px solid #2d3748;
+      background: #1e1828;
+      border: 1px solid #2e2438;
       border-radius: 8px;
       padding: 1.25rem;
       overflow-x: auto;
@@ -122,94 +122,94 @@ const htmlTemplate = `<!DOCTYPE html>
     }
     pre code { background: none; padding: 0; }
 
-    ul, ol { padding-left: 1.5rem; margin-bottom: 1rem; color: #cbd5e1; }
+    ul, ol { padding-left: 1.5rem; margin-bottom: 1rem; color: #c4a888; }
     li { margin-bottom: 0.25rem; }
 
     blockquote {
-      border-left: 3px solid #a78bfa;
+      border-left: 3px solid #e85218;
       padding: 0.5rem 1rem;
       margin: 1rem 0;
-      color: #94a3b8;
-      background: #161b27;
+      color: #9a8070;
+      background: #120f18;
       border-radius: 0 6px 6px 0;
     }
 
-    hr { border: none; border-top: 1px solid #2d3748; margin: 2rem 0; }
+    hr { border: none; border-top: 1px solid #2e2438; margin: 2rem 0; }
 
     footer {
-      background: #161b27;
-      border-top: 1px solid #2d3748;
+      background: #120f18;
+      border-top: 1px solid #2e2438;
       text-align: center;
       padding: 1.5rem;
       font-size: 0.85rem;
-      color: #475569;
+      color: #604838;
       margin-top: 4rem;
     }
 
-    footer a { color: #64748b; }
-    footer a:hover { color: #a78bfa; text-decoration: none; }
+    footer a { color: #7a6050; }
+    footer a:hover { color: #e85218; text-decoration: none; }
 
     /* Home */
     .hero {
       padding: 4rem 0 3rem;
-      border-bottom: 1px solid #2d3748;
+      border-bottom: 1px solid #2e2438;
       margin-bottom: 3rem;
     }
 
     .hero h1 {
       font-size: 2.8rem;
       margin: 0 0 0.5rem;
-      background: linear-gradient(90deg, #a78bfa, #60a5fa);
+      background: linear-gradient(90deg, #ff6b1a, #c81808);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
 
-    .hero p { font-size: 1.1rem; color: #64748b; margin: 0; }
+    .hero p { font-size: 1.1rem; color: #7a6050; margin: 0; }
 
     .posts-section h2 {
       font-size: 1rem;
       text-transform: uppercase;
       letter-spacing: 0.1em;
-      color: #475569;
+      color: #604838;
       margin: 0 0 1.25rem;
     }
 
     .post-list { list-style: none; padding: 0; margin: 0; }
-    .post-list li { border-bottom: 1px solid #1e2535; }
+    .post-list li { border-bottom: 1px solid #1e1828; }
 
     .post-list a {
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 1rem 0;
-      color: #e2e8f0;
+      color: #ecdcc8;
       text-decoration: none;
       transition: color 0.15s;
     }
 
-    .post-list a:hover { color: #a78bfa; }
+    .post-list a:hover { color: #e85218; }
     .post-list .post-title { font-size: 1rem; }
 
     .post-list .post-slug {
       font-size: 0.8rem;
-      color: #475569;
+      color: #604838;
       font-family: "JetBrains Mono", monospace;
     }
 
     /* Blog listing */
     .blog-header {
       padding: 2.5rem 0 2rem;
-      border-bottom: 1px solid #2d3748;
+      border-bottom: 1px solid #2e2438;
       margin-bottom: 2rem;
     }
 
     .blog-header h1 { margin: 0 0 0.25rem; font-size: 2rem; }
-    .blog-header p { margin: 0; color: #64748b; }
+    .blog-header p { margin: 0; color: #7a6050; }
 
     .blog-list { list-style: none; padding: 0; margin: 0; }
 
-    .blog-list li { border-bottom: 1px solid #1e2535; }
+    .blog-list li { border-bottom: 1px solid #1e1828; }
 
     .blog-list a {
       display: grid;
@@ -222,18 +222,18 @@ const htmlTemplate = `<!DOCTYPE html>
       transition: color 0.15s;
     }
 
-    .blog-list a:hover .blog-post-title { color: #a78bfa; }
+    .blog-list a:hover .blog-post-title { color: #e85218; }
 
     .blog-post-title {
       font-size: 1rem;
       font-weight: 500;
-      color: #e2e8f0;
+      color: #ecdcc8;
       transition: color 0.15s;
     }
 
     .blog-post-date {
       font-size: 0.82rem;
-      color: #475569;
+      color: #604838;
       font-family: "JetBrains Mono", monospace;
       text-align: right;
       align-self: start;
@@ -248,21 +248,21 @@ const htmlTemplate = `<!DOCTYPE html>
 
     .blog-post-words {
       font-size: 0.78rem;
-      color: #475569;
+      color: #604838;
     }
 
     .tag {
       font-size: 0.72rem;
       padding: 0.15em 0.55em;
       border-radius: 999px;
-      background: #1e2535;
-      color: #7dd3fc;
-      border: 1px solid #2d3748;
+      background: #1e1828;
+      color: #e89828;
+      border: 1px solid #2e2438;
     }
 
     .blog-list .tag { cursor: pointer; transition: background 0.15s, border-color 0.15s; }
-    .blog-list .tag:hover { background: #2d3748; border-color: #7dd3fc; }
-    .blog-list .tag.tag-active { background: #7dd3fc; color: #0f1117; border-color: #7dd3fc; }
+    .blog-list .tag:hover { background: #2e2438; border-color: #e89828; }
+    .blog-list .tag.tag-active { background: #e89828; color: #09080d; border-color: #e89828; }
 
     .tag-filter-bar {
       display: flex;
@@ -272,30 +272,30 @@ const htmlTemplate = `<!DOCTYPE html>
       min-height: 1.5rem;
     }
 
-    .tag-filter-label { font-size: 0.8rem; color: #475569; }
+    .tag-filter-label { font-size: 0.8rem; color: #604838; }
 
     .tag-clear {
       font-size: 0.75rem;
-      color: #475569;
+      color: #604838;
       background: none;
-      border: 1px solid #2d3748;
+      border: 1px solid #2e2438;
       border-radius: 999px;
       padding: 0.1em 0.6em;
       cursor: pointer;
       transition: color 0.15s, border-color 0.15s;
     }
 
-    .tag-clear:hover { color: #e2e8f0; border-color: #475569; }
+    .tag-clear:hover { color: #ecdcc8; border-color: #604838; }
 
     /* Projects */
     .projects-header {
       padding: 2.5rem 0 2rem;
-      border-bottom: 1px solid #2d3748;
+      border-bottom: 1px solid #2e2438;
       margin-bottom: 2rem;
     }
 
     .projects-header h1 { margin: 0 0 0.25rem; font-size: 2rem; }
-    .projects-header p { margin: 0; color: #64748b; }
+    .projects-header p { margin: 0; color: #7a6050; }
 
     .project-grid {
       display: grid;
@@ -303,8 +303,8 @@ const htmlTemplate = `<!DOCTYPE html>
     }
 
     .project-card {
-      background: #161b27;
-      border: 1px solid #2d3748;
+      background: #120f18;
+      border: 1px solid #2e2438;
       border-radius: 10px;
       padding: 1.25rem 1.5rem;
       text-decoration: none;
@@ -313,8 +313,8 @@ const htmlTemplate = `<!DOCTYPE html>
     }
 
     .project-card:hover {
-      border-color: #a78bfa;
-      background: #1a1f30;
+      border-color: #e85218;
+      background: #1a1218;
       text-decoration: none;
     }
 
@@ -329,19 +329,19 @@ const htmlTemplate = `<!DOCTYPE html>
     .project-name {
       font-size: 1rem;
       font-weight: 600;
-      color: #e2e8f0;
+      color: #ecdcc8;
     }
 
     .project-year {
       font-size: 0.78rem;
-      color: #475569;
+      color: #604838;
       font-family: "JetBrains Mono", monospace;
       white-space: nowrap;
     }
 
     .project-desc {
       font-size: 0.9rem;
-      color: #94a3b8;
+      color: #9a8070;
       margin: 0 0 0.85rem;
       line-height: 1.6;
     }
@@ -351,26 +351,26 @@ const htmlTemplate = `<!DOCTYPE html>
     /* About */
     .about-header {
       padding: 3rem 0 2.5rem;
-      border-bottom: 1px solid #2d3748;
+      border-bottom: 1px solid #2e2438;
       margin-bottom: 2.5rem;
     }
 
     .about-name {
       font-size: 2rem;
       font-weight: 700;
-      color: #f1f5f9;
+      color: #f0e0cc;
       margin: 0 0 0.25rem;
     }
 
     .about-headline {
       font-size: 1.05rem;
-      color: #64748b;
+      color: #7a6050;
       margin: 0 0 0.75rem;
     }
 
     .about-location {
       font-size: 0.85rem;
-      color: #475569;
+      color: #604838;
       display: flex;
       align-items: center;
       gap: 0.35rem;
@@ -378,7 +378,7 @@ const htmlTemplate = `<!DOCTYPE html>
 
     .about-bio {
       font-size: 1rem;
-      color: #cbd5e1;
+      color: #c4a888;
       line-height: 1.8;
       margin-bottom: 2rem;
     }
@@ -387,7 +387,7 @@ const htmlTemplate = `<!DOCTYPE html>
       font-size: 0.8rem;
       text-transform: uppercase;
       letter-spacing: 0.1em;
-      color: #475569;
+      color: #604838;
       margin: 0 0 0.85rem;
     }
 
@@ -402,9 +402,9 @@ const htmlTemplate = `<!DOCTYPE html>
       font-size: 0.82rem;
       padding: 0.3em 0.75em;
       border-radius: 6px;
-      background: #1e2535;
-      color: #e2e8f0;
-      border: 1px solid #2d3748;
+      background: #1e1828;
+      color: #ecdcc8;
+      border: 1px solid #2e2438;
     }
 
     .about-social { display: flex; flex-wrap: wrap; gap: 0.5rem; }
@@ -414,8 +414,8 @@ const htmlTemplate = `<!DOCTYPE html>
       align-items: center;
       gap: 0.35rem;
       font-size: 0.88rem;
-      color: #a78bfa;
-      border: 1px solid #2d3748;
+      color: #e85218;
+      border: 1px solid #2e2438;
       border-radius: 6px;
       padding: 0.35rem 0.85rem;
       text-decoration: none;
@@ -423,8 +423,8 @@ const htmlTemplate = `<!DOCTYPE html>
     }
 
     .social-link:hover {
-      background: #1e2535;
-      border-color: #a78bfa;
+      background: #1e1828;
+      border-color: #e85218;
       text-decoration: none;
     }
 
@@ -432,19 +432,19 @@ const htmlTemplate = `<!DOCTYPE html>
     /* Contact */
     .contact-header {
       padding: 2.5rem 0 2rem;
-      border-bottom: 1px solid #2d3748;
+      border-bottom: 1px solid #2e2438;
       margin-bottom: 2rem;
     }
 
     .contact-header h1 { margin: 0 0 0.25rem; font-size: 2rem; }
-    .contact-header p { margin: 0; color: #64748b; }
+    .contact-header p { margin: 0; color: #7a6050; }
 
     .contact-email {
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
       font-size: 1rem;
-      color: #a78bfa;
+      color: #e85218;
       margin-bottom: 2rem;
     }
 
@@ -453,7 +453,7 @@ const htmlTemplate = `<!DOCTYPE html>
     /* Comments */
     .comments {
       margin-top: 4rem;
-      border-top: 1px solid #2d3748;
+      border-top: 1px solid #2e2438;
       padding-top: 2rem;
     }
 
@@ -461,36 +461,36 @@ const htmlTemplate = `<!DOCTYPE html>
       font-size: 1rem;
       text-transform: uppercase;
       letter-spacing: 0.1em;
-      color: #475569;
+      color: #604838;
       margin: 0 0 1.5rem;
     }
 
     .comment {
-      background: #161b27;
-      border: 1px solid #2d3748;
+      background: #120f18;
+      border: 1px solid #2e2438;
       border-radius: 8px;
       padding: 1rem 1.25rem;
       margin-bottom: 1rem;
     }
 
     .comment-meta { display: flex; gap: 1rem; margin-bottom: 0.5rem; }
-    .comment-author { font-weight: 600; color: #a78bfa; font-size: 0.9rem; }
-    .comment-date { color: #475569; font-size: 0.85rem; }
-    .comment-body { color: #cbd5e1; font-size: 0.95rem; margin: 0; }
-    .no-comments { color: #475569; font-size: 0.9rem; margin-bottom: 1.5rem; }
+    .comment-author { font-weight: 600; color: #e85218; font-size: 0.9rem; }
+    .comment-date { color: #604838; font-size: 0.85rem; }
+    .comment-body { color: #c4a888; font-size: 0.95rem; margin: 0; }
+    .no-comments { color: #604838; font-size: 0.9rem; margin-bottom: 1.5rem; }
 
     /* Comment form */
     .comment-form {
       margin-top: 2rem;
-      background: #161b27;
-      border: 1px solid #2d3748;
+      background: #120f18;
+      border: 1px solid #2e2438;
       border-radius: 8px;
       padding: 1.5rem;
     }
 
     .comment-form h3 {
       font-size: 1rem;
-      color: #94a3b8;
+      color: #9a8070;
       margin: 0 0 1.25rem;
       font-weight: 500;
     }
@@ -500,14 +500,14 @@ const htmlTemplate = `<!DOCTYPE html>
     .form-optional {
       text-transform: none;
       letter-spacing: 0;
-      color: #334155;
+      color: #3a2818;
       font-style: italic;
     }
 
     .form-group label {
       display: block;
       font-size: 0.8rem;
-      color: #64748b;
+      color: #7a6050;
       margin-bottom: 0.35rem;
       text-transform: uppercase;
       letter-spacing: 0.05em;
@@ -516,11 +516,11 @@ const htmlTemplate = `<!DOCTYPE html>
     .form-group input,
     .form-group textarea {
       width: 100%;
-      background: #0f1117;
-      border: 1px solid #2d3748;
+      background: #09080d;
+      border: 1px solid #2e2438;
       border-radius: 6px;
       padding: 0.6rem 0.85rem;
-      color: #e2e8f0;
+      color: #ecdcc8;
       font-size: 0.95rem;
       font-family: inherit;
       outline: none;
@@ -528,13 +528,13 @@ const htmlTemplate = `<!DOCTYPE html>
     }
 
     .form-group input:focus,
-    .form-group textarea:focus { border-color: #a78bfa; }
+    .form-group textarea:focus { border-color: #e85218; }
 
     .form-group textarea { resize: vertical; min-height: 100px; }
 
     .form-submit {
-      background: #a78bfa;
-      color: #0f1117;
+      background: #e85218;
+      color: #09080d;
       border: none;
       border-radius: 6px;
       padding: 0.6rem 1.5rem;
@@ -544,7 +544,7 @@ const htmlTemplate = `<!DOCTYPE html>
       transition: background 0.15s;
     }
 
-    .form-submit:hover { background: #c4b5fd; }
+    .form-submit:hover { background: #ff7832; }
   </style>
 </head>
 <body>
@@ -584,7 +584,7 @@ const htmlTemplate = `<!DOCTYPE html>
         <p class="no-comments">No comments yet. Be the first!</p>
       {{end}}
       <div class="comment-form">
-        <h3>Leave a comment <a href="/info" style="font-size:0.75rem;font-weight:400;color:#475569;margin-left:0.4rem;">How does this work?</a></h3>
+        <h3>Leave a comment <a href="/info" style="font-size:0.75rem;font-weight:400;color:#604838;margin-left:0.4rem;">How does this work?</a></h3>
         <form method="POST" action="/comment">
           <input type="hidden" name="slug" value="{{.Slug}}">
           <div class="form-group">
@@ -698,7 +698,7 @@ const blogListContent = `<div class="blog-header">
 })();
 </script>
 {{else}}
-  <p style="color:#475569">No posts yet.</p>
+  <p style="color:#604838">No posts yet.</p>
 {{end}}`
 
 const projectsContent = `<div class="projects-header">
@@ -721,7 +721,7 @@ const projectsContent = `<div class="projects-header">
   {{end}}
 </div>
 {{else}}
-  <p style="color:#475569">No projects yet.</p>
+  <p style="color:#604838">No projects yet.</p>
 {{end}}`
 
 const aboutContent = `{{if .}}
@@ -746,7 +746,7 @@ const aboutContent = `{{if .}}
 </div>
 {{end}}
 {{else}}
-<p style="color:#475569">About page coming soon.</p>
+<p style="color:#604838">About page coming soon.</p>
 {{end}}`
 
 const contactContent = `{{if .}}
@@ -766,7 +766,7 @@ const contactContent = `{{if .}}
 </div>
 {{end}}
 {{else}}
-<p style="color:#475569">Contact page coming soon.</p>
+<p style="color:#604838">Contact page coming soon.</p>
 {{end}}`
 
 const infoContent = `<div class="blog-header">
