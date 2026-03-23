@@ -391,7 +391,7 @@ func TestLoadContact(t *testing.T) {
 	path := filepath.Join(dir, "contact.json")
 
 	data := Contact{
-		Email:   "julio@example.com",
+		Email:   "takaguij@gmail.com",
 		Message: "Reach out anytime.",
 		Social:  []SocialLink{{Label: "GitHub", URL: "https://github.com/Juliotds"}},
 	}
@@ -404,8 +404,8 @@ func TestLoadContact(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if got.Email != "julio@example.com" {
-		t.Errorf("expected email julio@example.com, got %q", got.Email)
+	if got.Email != "takaguij@gmail.com" {
+		t.Errorf("expected email takaguij@gmail.com, got %q", got.Email)
 	}
 	if len(got.Social) != 1 || got.Social[0].Label != "GitHub" {
 		t.Errorf("unexpected social links: %v", got.Social)

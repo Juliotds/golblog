@@ -5,10 +5,10 @@ BINARY := golblog
 all: build run
 
 build:
-	go build -o $(BINARY) .
+	go build -o $(BINARY) ./cmd
 
 run:
-	go run main.go
+	go run ./cmd
 
 test:
 	go test ./...
