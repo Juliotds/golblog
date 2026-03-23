@@ -1,14 +1,2 @@
 {
-  "hello-world": [
-    {
-      "author": "Alice",
-      "body": "Great first post! Looking forward to more.",
-      "date": "2026-03-19"
-    },
-    {
-      "author": "Bob",
-      "body": "Simple and clean setup. Nice work!",
-      "date": "2026-03-19"
-    }
-  ]
 }
