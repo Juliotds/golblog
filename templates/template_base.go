@@ -671,7 +671,7 @@ const htmlTemplate = `<!DOCTYPE html>
       {{end}}
       <div class="comment-form">
         <h3>Leave a comment <a href="/info" style="font-size:0.75rem;font-weight:400;color:#3f7398;margin-left:0.4rem;">How does this work?</a></h3>
-        <form method="POST" action="/comment">
+        <form method="POST" action="/comments">
           <input type="hidden" name="slug" value="{{.Slug}}">
           <div class="form-group">
             <label for="author">Name</label>

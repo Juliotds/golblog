@@ -9,7 +9,7 @@ const infoContent = `<div class="blog-header">
 <h2>Comment section</h2>
 <p>
   The comment form at the bottom of each post is intentionally minimal.
-  Submitting a comment sends a <code>POST</code> request to <code>/comment</code>
+  Submitting a comment sends a <code>POST</code> request to <code>/comments</code>
   with your name, message, and an optional private contact field.
 </p>
 <p>
