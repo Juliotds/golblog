@@ -185,6 +185,21 @@ func run() error {
 	}
 	fmt.Printf("info -> out/info/index.html\n")
 
+	if err := renderPage(filepath.Join(outDir, "comment-posted", "index.html"), templates.CommentPostedTmpl, nil); err != nil {
+		return fmt.Errorf("generating comment-posted page: %w", err)
+	}
+	fmt.Printf("cmnt -> out/comment-posted/index.html\n")
+
+	if err := renderPage(filepath.Join(outDir, "error", "index.html"), templates.ErrorTmpl, nil); err != nil {
+		return fmt.Errorf("generating error page: %w", err)
+	}
+	fmt.Printf("err  -> out/error/index.html\n")
+
+	if err := renderPage(filepath.Join(outDir, "invalid-operation", "index.html"), templates.InvalidOperationTmpl, nil); err != nil {
+		return fmt.Errorf("generating invalid-operation page: %w", err)
+	}
+	fmt.Printf("invl -> out/invalid-operation/index.html\n")
+
 	copied, err := copyImages(blogDir, outBlogDir)
 	if err != nil {
 		return fmt.Errorf("copying images: %w", err)
