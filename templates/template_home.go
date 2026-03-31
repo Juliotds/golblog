@@ -14,7 +14,8 @@ const homeContent = `<div class="hero">
     <li>
       <a href="/blog/{{.Slug}}">
         <span class="post-title">{{.Title}}</span>
-        <span class="post-slug">/blog/{{.Slug}}</span>
+        <span class="post-tags">{{range .Tags}}<span class="tag">{{.}}</span>{{end}}</span>
+        {{if .Date}}<span class="blog-post-date">{{.Date}}</span>{{end}}
       </a>
     </li>
     {{end}}

@@ -207,6 +207,7 @@ const htmlTemplate = `<!DOCTYPE html>
 
     .post-list a:hover { color: #cad1ce; }
     .post-list .post-title { font-size: 1rem; }
+    .post-list .post-tags { display: flex; gap: 0.3rem; flex-wrap: wrap; margin-left: auto; padding-right: 0.75rem; }
 
     .post-list .post-slug {
       font-size: 0.8rem;

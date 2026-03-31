@@ -8,6 +8,7 @@ import (
 	"html/template"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"golblog/templates"
@@ -144,6 +145,10 @@ func run() error {
 		fmt.Printf("%s -> %s\n", src, dst)
 		posts = append(posts, post)
 	}
+
+	sort.Slice(posts, func(i, j int) bool {
+		return posts[i].Date > posts[j].Date
+	})
 
 	if err := generateHomePage(filepath.Join(outDir, "index.html"), posts); err != nil {
 		return fmt.Errorf("generating home page: %w", err)

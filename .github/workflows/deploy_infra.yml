@@ -1,0 +1,32 @@
+name: Deploy Infra
+
+on:
+  workflow_dispatch:
+
+jobs:
+  update-cloudfront-function:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Update CloudFront function code
+        run: |
+          aws cloudfront update-function \
+            --name redirect_to_indexhtml \
+            --function-config Comment="Redirect to index.html and handle comment submissions",Runtime=cloudfront-js-2.0 \
+            --function-code fileb://infra/cloudfront_functions/redirect_to_index_html.js \
+            --if-match $(aws cloudfront describe-function --name redirect_to_indexhtml --query 'ETag' --output text)
+
+      - name: Publish CloudFront function
+        run: |
+          aws cloudfront publish-function \
+            --name redirect_to_indexhtml \
+            --if-match $(aws cloudfront describe-function --name redirect_to_indexhtml --query 'ETag' --output text)
