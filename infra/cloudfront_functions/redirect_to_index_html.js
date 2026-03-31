@@ -1,6 +1,6 @@
 import cf from 'cloudfront';
 
-const kvs = cf.kvs('CommentsKVS');
+const kvs = cf.kvs();
 
 const redirect = (path) => ({
     statusCode: 302,
