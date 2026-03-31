@@ -8,6 +8,11 @@ const redirect = (path) => ({
     headers: { location: { value: path } },
 });
 
+function qs(request, key) {
+    var entry = request.querystring[key];
+    return entry ? entry.value : '';
+}
+
 async function handler(event) {
     var request = event.request;
     var uri = request.uri;
@@ -21,14 +26,9 @@ async function handler(event) {
     // Handle comment submission
     if (method === 'POST' && uri === '/comments') {
         try {
-            var bodyText = request.body.encoding === 'base64'
-                ? atob(request.body.data)
-                : request.body.data;
-
-            var params = new URLSearchParams(bodyText);
-            var slug   = params.get('slug')   || '';
-            var author = params.get('author') || 'anonymous';
-            var body   = params.get('body')   || '';
+            var slug   = qs(request, 'slug');
+            var author = qs(request, 'author') || 'anonymous';
+            var body   = qs(request, 'body');
 
             if (!slug || !body.trim()) {
                 return redirect('/invalid-operation');

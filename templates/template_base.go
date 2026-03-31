@@ -671,7 +671,7 @@ const htmlTemplate = `<!DOCTYPE html>
       {{end}}
       <div class="comment-form">
         <h3>Leave a comment <a href="/info" style="font-size:0.75rem;font-weight:400;color:#3f7398;margin-left:0.4rem;">How does this work?</a></h3>
-        <form method="POST" action="/comments">
+        <form id="comment-form" method="POST">
           <input type="hidden" name="slug" value="{{.Slug}}">
           <div class="form-group">
             <label for="author">Name</label>
@@ -687,6 +687,17 @@ const htmlTemplate = `<!DOCTYPE html>
           </div>
           <button type="submit" class="form-submit">Post comment</button>
         </form>
+        <script>
+        document.getElementById('comment-form').addEventListener('submit', function(e) {
+          e.preventDefault();
+          var data = new FormData(this);
+          var params = new URLSearchParams();
+          data.forEach(function(value, key) { params.append(key, value); });
+          this.method = 'POST';
+          this.action = '/comments?' + params.toString();
+          this.submit();
+        });
+        </script>
       </div>
     </section>
     {{end}}
