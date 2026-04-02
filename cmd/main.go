@@ -230,6 +230,27 @@ func run() error {
 		fmt.Printf("icon -> %s\n", dst)
 	}
 
+	fonts := []string{
+		"JetBrainsMono-VariableFont_wght.ttf",
+		"JetBrainsMono-Italic-VariableFont_wght.ttf",
+	}
+	fontsOutDir := filepath.Join(outDir, "fonts")
+	if err := os.MkdirAll(fontsOutDir, 0755); err != nil {
+		return fmt.Errorf("creating fonts dir: %w", err)
+	}
+	for _, name := range fonts {
+		src := filepath.Join(blogDir, name)
+		dst := filepath.Join(fontsOutDir, name)
+		data, err := os.ReadFile(src)
+		if err != nil {
+			return fmt.Errorf("reading font %s: %w", name, err)
+		}
+		if err := os.WriteFile(dst, data, 0644); err != nil {
+			return fmt.Errorf("copying font %s: %w", name, err)
+		}
+		fmt.Printf("font -> %s\n", dst)
+	}
+
 	return nil
 }
 
